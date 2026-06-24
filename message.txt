@@ -1,0 +1,103 @@
+## 설명/프롬프트
+
+### 1. 줄글 정리 버전 (서비스 기획 요약 백서)
+
+**[구조 및 내비게이션 바]**
+
+앱은 세로형 모바일 폼팩터이며, 하단 내비게이션 바는 왼쪽부터 **[크루], [홈], [마이페이지]** 3개의 탭으로 구성됩니다.
+
+**[홈 화면: 나의 섬]**
+
+- **화면 구성:** 메인 화면은 하나의 '섬'을 배경으로 합니다. 섬 안에는 다이아몬드 형태로 배치된 4개의 오두막(건물 버튼)이 있으며, 정중앙에는 미니게임 진입 버튼이 존재합니다.
+- **4개의 오두막 기능 (상단부터 시계 방향 배치):**
+    1. **북쪽 (12시) - 기본 설정:** 이번 주 운동 종목 및 예상 강도, 기본 운동 시간을 세팅합니다. 실외 사이클이나 러닝 선택 시 GPS 기반의 경로 저장 여부를 토글할 수 있습니다.
+    2. **동쪽 (3시) - 친구 목록:** 크루별 탭으로 분류된 친구 리스트를 보여줍니다. 리스트 형태의 친구 카드를 클릭하면 해당 친구의 마이페이지 피드로 이동합니다.
+    3. **남쪽 (6시) - 운동 기록:** 지난 운동 히스토리를 확인하고, 오운완 사진 인증을 통해 수동으로 운동 기록을 등록하는 저장소 역할을 합니다.
+    4. **서쪽 (9시) - 창고 및 상점:** 내 현재 운동력 수치, 실제 러닝 코스로 커스텀 생성된 트랙 모양 돌, 운동력으로 구매한 나무판자 등 자재들을 확인하고 상점에서 필요한 아이템을 구매할 수 있습니다.
+- **핵심 재화 및 재료 획득 알고리즘:**
+    - **나무판자:** 운동 데이터가 **MET(소비 대사량) 기준**으로 계산되어 '운동력' 재화로 축적되면, 이 운동력을 소모해 상점에서 구매합니다.
+    - **러닝 트랙 모양 돌:** 실외 사이클이나 러닝 시 GPS 기반으로 기록된 실제 이동 경로(코스 정보)를 고유한 돌의 형태로 변환하여 저장합니다. 이때 **해당 운동 중 기록된 MET 수치에 비례하여 돌의 기본 스케일(크기)이 결정**됩니다. 즉, 더 높은 강도로 열심히 달렸을수록 시뮬레이션 시 다리를 받쳐줄 더 크고 단단한 모양의 돌이 생성됩니다.
+    - 이 자재들은 주말마다 진행되는 섬 확장 미니게임 **'윌슨&로빈슨'**에서 다리를 건설하는 재료로 사용됩니다.
+
+[윌슨&로빈슨 미니게임 모드]
+
+- **월드맵 화면:** 게임 진입 시 중심에서 사방으로 뻗어 나가는 별 모양의 노드 맵(마치 RPG 게임의 스킬 트리나 스테이지 선택 창 같은 형태)이 나타납니다. 각 노드는 '섬'을 뜻하며 [지나온 섬], [현재 섬], [방문하지 않은 바로 근처 섬], [원거리 섬]이 시각적으로 다르게 표시됩니다.
+- **다리 건설 및 물리 엔진 시연:** 이동할 인접 섬을 선택하면, 화면 좌측에 현재 섬, 우측에 목표 섬이 배치되고 그 사이가 절벽이나 바다로 단절된 3D 쿼터뷰 화면으로 전환됩니다. 유저는 인당 2번의 기회 동안 운동력으로 산 자재(나무판자, 트랙 돌)를 쌓아 다리를 건설합니다. 크루원들과 실시간 혹은 비동기식으로 재재를 함께 투입해 공동 건설이 가능합니다. 건설 후 실행 버튼을 누르면 캐릭터가 왼쪽에서 오른쪽 섬으로 이동하는 2D/3D 물리 엔진(교량 건설 시뮬레이터 게임 스타일)이 작동하며, 캐릭터가 추락하지 않고 무사히 건너가면 섬 이동에 성공합니다. 성공 시 현재 위치한 섬 데이터가 갱신됩니다.
+
+**[크루 탭 화면]**
+
+- **상단 UI:** 크루 탭 상단에는 현재 크루의 인원수 규모에 따라 형태가 다르게 변하는(예: 소규모는 텐트나 작은 집, 대규모는 빌딩 형태) **'크루 본부 건물'** 비주얼이 노출됩니다.
+- **하단 탭 (좌우 스크롤 스위칭):**
+    - **첫 번째 탭 (주간 운동 로드맵):** 일주일 동안의 운동 성취도를 나타내는 뱀 모양의 곡선 경로(S자 형태의 모바일 보드게임 스테이지 맵 모양)가 배치됩니다. 운동을 완료할 때마다 원형 노드로 다음 단계로 진입하며, 나를 포함한 크루원들의 캐릭터가 각자의 성취 단계(위치)에 실시간으로 나란히 표시되어 서로의 진척도를 확인할 수 있습니다.
+    - **두 번째 탭 (크루원 그리드 및 관리):** 크루원들의 프로필 카드가 바둑판(Grid) 형태로 정렬됩니다. 멤버 카드를 클릭하면 마이페이지 피드로 연결되며, 비어 있는 그리드 슬롯에는 [+] 버튼이 노출되어 터치 시 새로운 크루원을 검색하고 추가할 수 있습니다.
+
+### 2. 디자인 생성형 AI용 프롬프트 (Visual Design)
+
+```
+[Role]
+You are a Lead UI/UX and Game Concept Designer specializing in casual, gamified mobile applications.
+
+[Project Style & Mood]
+- Style: Low-poly 3D or casual stylized 3D graphics, reminiscent of "Clash of Clans" and clean physics puzzle games like "Poly Bridge".
+- Atmosphere: Bright, encouraging, outdoor adventure, clean flat UI layout with playful 3D assets.
+
+[Screen 1: Main Home Screen - "My Island"]
+- Layout: Vertical mobile view. Centered around a single green floating island surrounded by blue water.
+- Core Elements:
+  * 4 small stylized wooden cabins (huts) arranged in a precise diamond shape on the island.
+  * North Cabin (12 o'clock): "Settings" icon subtly integrated.
+  * East Cabin (3 o'clock): "Friends/Crew" icon.
+  * South Cabin (6 o'clock): "Workout Log/History" icon.
+  * West Cabin (9 o'clock): "Storage/Shop" icon (Displays user's inventory containing wooden planks purchased with fitness points, and unique run-track stones custom-generated from their actual GPS running routes).
+  * At the absolute center of the island, between the 4 cabins, there is a prominent, glowing interactive portal button designed for entering the weekly mini-game.
+- HUD: A clean bottom navigation bar with three tabs: [Crew (Left), Home (Center), My Page (Right)].
+
+[Screen 2: Mini-Game Stage Map & Bridge Construction Interface]
+- View A (World Map): An expansive radial network node map against a soft background. Hexagonal or circular icons representing islands branch out from the center like a skill tree. Clear visual differentiation between: 'Cleared Islands', 'Current Island' (highlighted), 'Locked Outer Islands', and 'Accessible Adjacent Islands' marked with a "New!" indicator.
+- View B View B (Bridge Gameplay): A 3D isometric or side-view slice of two islands separated by a gorge. The current island is on the left, the target island is on the right. In the gap between them, showcase a bridge structure built with raw wooden planks and stones. These stones are explicitly shaped after the user's actual GPS running paths, with their 3D scale/volume dynamically sized up based on the workout's MET intensity (higher intensity workouts produce visibly larger and thicker rocks).
+
+[Screen 3: Crew Tab Interface]
+- Top Section: A dynamic "Crew Headquarters Building" that visually evolves based on group size (e.g., small tent for few members, a large modern brick building for full groups).
+- Bottom Section (Two-page Swipe Layout):
+  * Page 1 (Weekly Progress): A winding, horizontal S-shaped pathway filled with circular nodes representing a 7-day workout streak. Multiple cute, low-poly chibis/avatars representing different crew members are placed on different nodes depending on their real-time weekly progress.
+  * Page 2 (Member Grid): A clean 3x3 grid layout displaying crew member profile cards. Empty slots display a minimalist [+] button for inviting friends, with a magnifying glass search icon at the bottom corner.
+```
+
+### 3. 코딩 생성형 AI용 프롬프트 (Architecture & Logic)
+
+```
+[Role]
+You are a Senior Full-Stack Architect proficient in Mobile App Development, Hybrid Game Frameworks (React Native with WebGL/Three.js or Capacitor), and Physics Engines (such as Matter.js or Ammo.js).
+
+[System Architecture Overview]
+You need to design a gamified mobile fitness app architecture. The client uses a React Native or Capacitor shell for native mobile layouts (tabs, settings, database, native GPS tracking), while rendering complex 3D scenes (Home Island, Bridge mini-game) via a WebGL container (like React Three Fiber or a specialized WebView canvas).
+
+[Functional Specifications & Backend/State Requirements]
+
+1. Home Screen Logic & State Data Schema:
+   - Manage state for a 4-node diamond layout wrapper synced with local/server data:
+     * North Node: Form inputs for Workout Configuration (Type, Intensity, Base Time, and a Boolean toggle for GPS route recording).
+     * East Node: Crew filtered friend list fetching relational records; clicking a card routes to User Profile Feed.
+     * South Node: Workout logs history array requiring an Image URL string for manual photo verification upload.
+     * West Node: Inventory tracking for cumulative 'MET-based Fitness Points', 'Wooden Plank assets' (purchased via points), and 'Track Stone assets'.
+     - Core Loop & Asset Generation: 
+     * Convert physical MET scores into 'Fitness Points' currency used exclusively to purchase Wooden Planks.
+     * Implement a GPS GeoJSON-to-3D Mesh compiler for 'Track Stones'. When a running session ends, extract the GPS polyline array to define the stone's top-surface contour geometry. Automatically multiply the mesh's global transform scale $(X, Y, Z)$ by a coefficient derived from the session's average MET intensity (e.g., $Scale_{stone} = f(MET_{avg})$), creating larger rigid bodies for higher-intensity workouts.
+   
+2. "Wilson & Robinson" Weekly Bridge Mini-Game (Physics & Map Node Logic):
+   - Map Representation: An unweighted radial graph structure where nodes represent islands. Node states: `VISITED`, `CURRENT`, `ADJACENT_AVAILABLE`, `LOCKED`.
+   - Bridge Building State: When `ADJACENT_AVAILABLE` is selected, instantiate a 2D/3D physics environment. The bridge assets consist of static-length wooden planks (currency-purchased) and custom-shaped track stone meshes whose mass, density, and structural bounding box properties are dictated by the runtime scale computed from the user's original workout MET data.
+   - Multi-User Co-op Construction Constraints: Allow crew members to asynchronously or synchronously post structural placement coordinates (planks, stones) to a shared room instance via WebSockets. Max 2 submission attempts per user per weekend session.
+   - Simulation Trigger: On execution, apply a rigid-body physics simulation. Program an evaluation function where a character entity moves from Left Node ($x_{start}$) to Right Node ($x_{end}$). If the character's bounding box falling velocity matches a gravity threshold ($y < y_{fail}$), trigger failure and rollback materials. If character reaches target bounds, update user state: `direct_previous_island = VISITED`, `current_island = target_island`.
+
+3. Crew Tab UI Component & Data Sync:
+   - Create a container view driven by a ViewPager or Swipe gesture controller.
+   - Top Component: Dynamic UI component rendering different asset packages based on `crew_member_count` scalar.
+   - Swipe Page 1 (Weekly Roadmap Tracking): An ordered list map (array of 7 sequence nodes). Sync and stream an array of crew member objects: `[{userId: string, currentStep: integer, avatarAsset: string}]`. Render avatars dynamically on matching step coordinates.
+   - Swipe Page 2 (Grid Directory): A CSS Flex/Grid component mapping user profiles. If slot index exceeds `crew.members.length`, render an explicit actionable button triggering an invitation modal linked to a search query controller.
+
+[Requested Output]
+1. Define the complete JSON schema or SQL schema mapping Users, Workouts (MET data), Crews, Island Nodes, and Shared Bridge Session states.
+2. Provide a React Native / TypeScript state management model (using Zustand, Redux Toolkit, or React Context) handling the navigation state between the Home Canvas and the Crew Swipe sub-tabs.
+3. Write a mock Javascript physics simulation evaluation loop representing the bridge crossing validity check (character movement constraint and failure threshold validation).
+```

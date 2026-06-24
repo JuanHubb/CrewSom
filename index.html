@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CrewSom - WebGL Gamified Fitness</title>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Core Stylesheet -->
+  <link rel="stylesheet" href="style.css?v=3">
+</head>
+<body>
+
+  <!-- Phone Container Outer Frame -->
+  <div id="phone-container">
+    <div id="phone-frame">
+      
+      <!-- Toast Alert System -->
+      <div id="toast-container"></div>
+      
+      <!-- Three.js Canvas -->
+      <div id="canvas-wrapper" style="position: absolute; top:0; left:0; width:100%; height:100%;">
+        <canvas id="three-canvas"></canvas>
+      </div>
+
+      <!-- HUD Overlay -->
+      <div id="hud-overlay">
+        <div class="hud-left">
+          <div class="hud-stat heart" title="남은 하트">
+            <i class="fa-solid fa-heart"></i>
+            <span class="hud-stat-val" id="hud-hearts">10</span>
+          </div>
+          <div class="hud-stat steps" title="주간 운동 성취도 (노드 위치)">
+            <i class="fa-solid fa-person-running"></i>
+            <span class="hud-stat-val" id="hud-steps">75</span>
+          </div>
+        </div>
+        <div class="hud-right">
+          <div class="hud-btn" id="btn-settings-hud" title="설정">
+            <i class="fa-solid fa-cog"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3D Scene Floating Labels (Positioned dynamically over 3D Huts) -->
+      <div id="floating-labels-container">
+        <!-- North Hut -->
+        <div class="floating-bubble" id="lbl-north" style="top: 25%; left: 50%;">주 운동</div>
+        <!-- East Hut -->
+        <div class="floating-bubble" id="lbl-east" style="top: 38%; left: 80%;">윌슨</div>
+        <!-- West Hut -->
+        <div class="floating-bubble" id="lbl-west" style="top: 38%; left: 20%;">아이템</div>
+        <!-- South Hut -->
+        <div class="floating-bubble" id="lbl-south" style="top: 58%; left: 50%;">기록</div>
+        <!-- Campfire Monument (Center) -->
+        <div class="floating-bubble center-bubble" id="lbl-center" style="top: 48%; left: 50%;">
+          윌슨 & 로빈슨 <span style="margin-left: 5px; color: var(--color-danger); font-weight:900;">D-5</span>
+        </div>
+        <!-- Red Buoy in the Water -->
+        <div class="floating-bubble buoy-bubble" id="lbl-buoy" style="top: 70%; left: 50%;">종목</div>
+      </div>
+
+      <!-- Start Button ("시작" Wood Button) -->
+      <button class="wood-btn-large" id="btn-start">시작</button>
+
+      <!-- Bottom Navigation Bar -->
+      <nav id="nav-bar">
+        <div class="nav-tab" id="tab-mypage">
+          <i class="fa-regular fa-user"></i>
+          <span>마이페이지</span>
+        </div>
+        <div class="nav-tab active" id="tab-home">
+          <i class="fa-solid fa-home"></i>
+          <span>홈</span>
+        </div>
+        <div class="nav-tab" id="tab-crew">
+          <i class="fa-solid fa-user-group"></i>
+          <span>친구</span>
+        </div>
+      </nav>
+
+      <!-- ================= MODALS SYSTEM ================= -->
+
+      <!-- North Modal: Workout Settings (주 운동) -->
+      <div class="modal-overlay" id="modal-workout">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-dumbbell"></i> 주 운동 설정</h3>
+            <button class="modal-close"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <span class="form-label">운동 종목 선택</span>
+              <div class="radio-group" id="workout-type-group">
+                <div class="radio-card active" data-value="RUNNING">
+                  <i class="fa-solid fa-person-running"></i>
+                  <span>러닝</span>
+                </div>
+                <div class="radio-card" data-value="CYCLING">
+                  <i class="fa-solid fa-bicycle"></i>
+                  <span>사이클</span>
+                </div>
+                <div class="radio-card" data-value="WALKING">
+                  <i class="fa-solid fa-person-walking"></i>
+                  <span>걷기</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <span class="form-label">예상 강도</span>
+              <div class="radio-group" id="workout-intensity-group">
+                <div class="radio-card" data-value="LOW">
+                  <i class="fa-solid fa-leaf" style="color: #6ee7b7;"></i>
+                  <span>저강도</span>
+                </div>
+                <div class="radio-card active" data-value="MODERATE">
+                  <i class="fa-solid fa-bolt" style="color: #fde047;"></i>
+                  <span>중강도</span>
+                </div>
+                <div class="radio-card" data-value="HIGH">
+                  <i class="fa-solid fa-fire" style="color: #fca5a5;"></i>
+                  <span>고강도</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="slider-container">
+                <div class="slider-header">
+                  <span class="form-label">기본 운동 시간</span>
+                  <span class="slider-val" id="val-duration">30분</span>
+                </div>
+                <input type="range" class="range-slider" id="slider-duration" min="10" max="120" step="5" value="30">
+              </div>
+            </div>
+
+            <div class="toggle-group">
+              <div class="toggle-info">
+                <span class="toggle-title">GPS 경로 저장</span>
+                <span class="toggle-desc">완료 시 GPS 경로로 3D 트랙 돌을 생성합니다.</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="toggle-gps" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="form-group" id="gps-path-selector-group">
+              <span class="form-label">GPS 경로 데이터 선택 (가상)</span>
+              <select class="select-input" id="select-gps-path">
+                <option value="river-trail">한강 시민공원 코스 (루프)</option>
+                <option value="mountain-loop">남산 둘레길 코스 (별모양)</option>
+                <option value="city-park">여의도 공원 코스 (지그재그)</option>
+                <option value="dragon-tail">북한산 등산 코스 (파도형)</option>
+              </select>
+            </div>
+
+            <button class="wood-btn-large" id="btn-save-workout" style="position:static; transform:none; width:100%; font-size:18px; margin-top:10px; height:50px;">운동 완료 & 3D 트랙돌 생성</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- East Modal: Friends (친구) -->
+      <div class="modal-overlay" id="modal-friends-list">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-user-friends"></i> 친구 리스트</h3>
+            <button class="modal-close"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="modal-body">
+            <div class="subtabs">
+              <div class="subtab active" data-tab="crew-friends">크루 친구</div>
+              <div class="subtab" data-tab="all-users">유저 검색</div>
+            </div>
+            
+            <div id="tab-crew-friends-content" class="friends-list">
+              <!-- Dynamically generated friend cards -->
+            </div>
+
+            <div id="tab-all-users-content" class="friends-list" style="display:none;">
+              <div class="search-container">
+                <input type="text" class="search-input" id="input-search-user" placeholder="닉네임 입력...">
+                <button class="btn-search" id="btn-search-user">검색</button>
+              </div>
+              <div id="search-results-list" class="friends-list" style="margin-top: 10px;">
+                <!-- Search results -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- South Modal: Workout History (기록) -->
+      <div class="modal-overlay" id="modal-history-list">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-history"></i> 운동 기록 보관소</h3>
+            <button class="modal-close"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="modal-body">
+            <div class="subtabs">
+              <div class="subtab active" data-tab="history-view">기록 내역</div>
+              <div class="subtab" data-tab="history-upload">오운완 수동 인증</div>
+            </div>
+
+            <div id="tab-history-view-content" class="history-list">
+              <!-- Logged workouts here -->
+            </div>
+
+            <div id="tab-history-upload-content" style="display:none; flex-direction:column; gap:16px;">
+              <div class="upload-zone" id="history-dropzone">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span>운동 인증 사진 업로드</span>
+                <p>여기를 탭하거나 이미지를 드래그 앤 드롭하세요</p>
+                <input type="file" id="history-file-input" style="display:none;" accept="image/*">
+              </div>
+              
+              <div class="form-group">
+                <span class="form-label">인증할 가상 운동 정보</span>
+                <select class="select-input" id="select-upload-workout-type">
+                  <option value="RUNNING">러닝 (30분, 중강도)</option>
+                  <option value="CYCLING">사이클 (45분, 고강도)</option>
+                  <option value="WALKING">걷기 (60분, 저강도)</option>
+                </select>
+              </div>
+
+              <button class="wood-btn-large" id="btn-submit-manual-log" style="position:static; transform:none; width:100%; font-size:18px; height:50px;">기록 저장 및 인증 완료</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- West Modal: Items & Shop (창고 및 상점) -->
+      <div class="modal-overlay" id="modal-warehouse-shop">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-warehouse"></i> 창고 및 상점</h3>
+            <button class="modal-close"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="modal-body">
+            <div class="subtabs">
+              <div class="subtab active" data-tab="warehouse-view">창고 인벤토리</div>
+              <div class="subtab" data-tab="shop-view">상점</div>
+            </div>
+
+            <div id="tab-warehouse-view-content" style="display:flex; flex-direction:column; gap:16px;">
+              <div class="inventory-grid">
+                <div class="inv-card">
+                  <i class="fa-solid fa-star inv-icon"></i>
+                  <span class="inv-count" id="inv-points-val">0</span>
+                  <span class="inv-name">운동력 (Fitness Points)</span>
+                </div>
+                <div class="inv-card">
+                  <i class="fa-solid fa-cubes inv-icon" style="color:var(--wood-light)"></i>
+                  <span class="inv-count" id="inv-planks-val">0</span>
+                  <span class="inv-name">나무판자 개수</span>
+                </div>
+              </div>
+
+              <span class="form-label">보유한 3D 트랙 돌 목록 (GPS 연동)</span>
+              <div class="track-stones-list" id="warehouse-stones-list">
+                <!-- Stones -->
+              </div>
+            </div>
+
+            <div id="tab-shop-view-content" style="display:none; flex-direction:column; gap:12px;">
+              <div class="shop-item">
+                <div class="shop-left">
+                  <div style="font-size:32px; color:var(--wood-light)"><i class="fa-solid fa-cubes"></i></div>
+                  <div class="shop-details">
+                    <span class="shop-item-title">나무판자 1개</span>
+                    <span class="shop-item-cost"><i class="fa-solid fa-star"></i> 100 FP</span>
+                  </div>
+                </div>
+                <button class="btn-buy" id="btn-buy-plank">구매</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center Modal: Wilson & Robinson Stage Map (월드맵 노드) -->
+      <div class="modal-overlay" id="modal-stage-map">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-map"></i> 윌슨 & 로빈슨 월드맵</h3>
+            <button class="modal-close"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="modal-body">
+            <span class="form-label">개척할 다음 섬을 선택하세요</span>
+            <div class="map-nodes-container" id="map-nodes-view">
+              <svg class="map-connections" id="map-svg-connections"></svg>
+              <!-- Nodes are generated dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings HUD Modal -->
+      <div class="modal-overlay" id="modal-settings">
+        <div class="modal-content" style="max-height:60%;">
+          <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-cog"></i> 설정</h3>
+            <button class="modal-close"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <span class="form-label">계정 프로필</span>
+              <div style="display:flex; align-items:center; gap:16px; background:rgba(255,255,255,0.03); padding:12px; border-radius:12px;">
+                <div class="avatar-circle" style="background:#ec4899">HR</div>
+                <div>
+                  <div style="font-weight:700;">홍길동 (Wilson Crew)</div>
+                  <div style="font-size:11px; color:var(--color-text-muted);">유저 ID: user-wilson-4829</div>
+                </div>
+              </div>
+            </div>
+            <button class="wood-btn-large" id="btn-reset-app-data" style="position:static; transform:none; width:100%; font-size:14px; background:linear-gradient(180deg, #ef4444, #b91c1c); border-color:#7f1d1d; height:44px; margin-top:10px;">앱 데이터 초기화</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Friend Profile View Modal -->
+      <div class="modal-overlay" id="modal-profile">
+        <div class="modal-content" style="max-height: 85%;">
+          <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-user"></i> 프로필 피드</h3>
+            <button class="modal-close"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="modal-body" id="modal-profile-info">
+            <!-- Profile Details -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Workout Detail Modal -->
+      <div class="modal-overlay" id="modal-workout-detail">
+        <div class="modal-content" style="max-height: 82%;">
+          <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-circle-info"></i> 운동 상세 기록</h3>
+            <button class="modal-close"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="modal-body" id="modal-workout-detail-content" style="padding: 20px;">
+            <!-- Details populated dynamically in app.js -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= MYPAGE VIEW (LEFT TAB) ================= -->
+      <div id="mypage-view">
+        <div class="mypage-header">
+          <div class="mypage-title"><i class="fa-regular fa-user"></i> 마이페이지</div>
+        </div>
+        <div class="mypage-body" id="mypage-body-content">
+          <!-- Populated dynamically in app.js -->
+        </div>
+      </div>
+
+      <!-- ================= CREW VIEW (LEFT TAB) ================= -->
+      <div id="crew-view">
+        <div class="crew-header">
+          <div class="hq-building-container">
+            <i class="fa-solid fa-tents hq-building-img" id="hq-building-icon"></i>
+          </div>
+          <div class="hq-info">
+            <div class="hq-title" id="lbl-hq-name">CrewSom 윌슨 연합</div>
+            <div class="hq-level" id="lbl-hq-level">레벨 1 - 텐트 캠프 (인원: 4명)</div>
+          </div>
+          <div class="subtabs" style="width:100%; margin-top:8px;">
+            <div class="subtab active" id="crew-tab-roadmap">주간 로드맵</div>
+            <div class="subtab" id="crew-tab-grid">크루 구성원</div>
+          </div>
+        </div>
+        
+        <div class="crew-body">
+          <div class="swipe-content">
+            
+            <!-- Page 1: Weekly Progress S-Curve -->
+            <div class="swipe-page active" id="page-crew-roadmap">
+              <div class="roadmap-container" id="crew-roadmap-viewport">
+                <!-- SVG path representing the S curve -->
+                <svg class="roadmap-path" id="crew-roadmap-svg"></svg>
+                <!-- Day nodes (1-7) -->
+                <!-- Avatars on steps -->
+              </div>
+              <div style="font-size:11px; text-align:center; color:var(--color-text-muted);">
+                크루원들의 주간 운동 달성도(1~7단계)를 실시간 모니터링합니다.
+              </div>
+            </div>
+
+            <!-- Page 2: Member Grid (Customized based on screenshot) -->
+            <div class="swipe-page" id="page-crew-grid">
+              <div class="crew-search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="친구 이름을 검색해보세요..." id="crew-member-search">
+              </div>
+              
+              <div class="crew-profile-header">
+                <div class="crew-profile-header-left">
+                  <i class="fa-solid fa-tent crew-tent-icon"></i>
+                </div>
+                <div class="crew-profile-header-right">
+                  <div class="crew-header-stat heart">
+                    <i class="fa-solid fa-heart"></i> 5
+                  </div>
+                  <div class="crew-header-stat steps">
+                    <i class="fa-solid fa-shoe-prints"></i> 14
+                  </div>
+                  <span class="crew-name-lbl">여정 크루</span>
+                </div>
+              </div>
+              
+              <div class="journey-grid" id="crew-members-grid">
+                <!-- 3x4 grid slots -->
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= BRIDGE GAME VIEWPORT OVERLAY ================= -->
+      <div id="bridge-game-overlay">
+        <div class="game-header">
+          <span class="game-header-title" id="game-title">윌슨 & 로빈슨 다리 건설</span>
+          <button class="modal-close" id="btn-close-game" style="background:rgba(255,255,255,0.15)"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <div class="game-canvas-container">
+          <canvas id="bridge-canvas"></canvas>
+          <div class="game-instructions" id="game-instruction-bar">
+            아래 인벤토리에서 자재를 선택한 뒤, 다리 건설 화면을 탭하여 배치하세요.<br>
+            (각 자재는 마우스 드래그로 위치 조절이 가능합니다)
+          </div>
+        </div>
+
+        <div class="game-drawer">
+          <span class="drawer-title"><i class="fa-solid fa-toolbox"></i> 사용할 다리 자재 (남은 설치 기회: <span id="game-attempts-val">2</span>/2)</span>
+          <div class="drawer-items" id="game-drawer-items">
+            <!-- Material choices from inventory -->
+          </div>
+
+          <div class="game-controls">
+            <button class="btn-game-action btn-clear" id="btn-game-clear">
+              <i class="fa-solid fa-trash-can"></i> 회수
+            </button>
+            <button class="btn-game-action btn-simulate" id="btn-game-simulate">
+              <i class="fa-solid fa-play"></i> 시뮬레이션 시작
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CDN scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <!-- Application Logic -->
+  <script src="app.js?v=3"></script>
+</body>
+</html>

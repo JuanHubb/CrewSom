@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CrewSom Voyage - WebGL 3D World Map & Bridge Building</title>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Core Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Screen Container -->
+  <div id="phone-container">
+    <div id="phone-frame">
+      
+      <!-- Toast Alert System -->
+      <div id="toast-container"></div>
+      
+      <!-- Three.js Canvas Container -->
+      <div id="canvas-container">
+        <canvas id="three-canvas"></canvas>
+      </div>
+
+      <!-- ================= VIEW 1: WORLD MAP HUD OVERLAYS ================= -->
+      <div id="world-map-hud" class="hud-panel active">
+        <!-- Top HUD -->
+        <div class="top-hud-bar">
+          <a href="../index.html" class="hud-btn-circle" title="홈 아일랜드로 가기">
+            <i class="fa-solid fa-arrow-left"></i>
+          </a>
+          <div class="hud-title-card">
+            <i class="fa-solid fa-map-marked-alt"></i>
+            <span>군도 개척 지도</span>
+          </div>
+        </div>
+
+        <!-- Mission Details Bottom Card -->
+        <div id="map-mission-card" class="mission-card">
+          <div class="mission-card-header">
+            <div class="mission-landmark-icon" id="mission-icon">⛺</div>
+            <div style="flex:1; margin-left:12px;">
+              <div class="mission-island-name" id="mission-name">난파자의 섬</div>
+              <div class="mission-island-sub" id="mission-subtitle">탐험 시작</div>
+            </div>
+            <div class="island-status-badge" id="mission-status-badge">현재 위치</div>
+          </div>
+          <p class="mission-island-desc" id="mission-desc">이곳은 처음 정착을 마친 섬입니다. 동쪽의 벚꽃섬이나 북쪽의 불꽃섬 항로를 차례로 개척해 나가세요.</p>
+          <button class="wood-btn-large" id="btn-start-voyage" style="position:static; transform:none; width:100%; font-size:18px; height:46px; margin-top:8px;">탐험 시작</button>
+        </div>
+      </div>
+
+      <!-- ================= VIEW 2: BRIDGE GAME HUD OVERLAYS ================= -->
+      <div id="bridge-game-hud" class="hud-panel">
+        <!-- Top HUD Bar -->
+        <div class="top-hud-bar">
+          <button class="hud-btn-circle" id="btn-back-to-map" title="군도 지도로 가기">
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+          <div class="bridge-names-card">
+            <span id="bridge-from-name">바람섬</span>
+            <i class="fa-solid fa-arrow-right"></i>
+            <span id="bridge-to-name">벚꽃섬</span>
+          </div>
+          <div class="supply-hud-chip">
+            <i class="fa-solid fa-toolbox" style="color:var(--color-primary);"></i>
+            <span>보급력: <strong id="lbl-supply-val">14</strong></span>
+          </div>
+        </div>
+
+        <!-- Tip / State Bar -->
+        <div id="bridge-instruction-bar">
+          재료를 고른 뒤 바다 위를 눌러 다리를 만드세요.
+        </div>
+
+        <!-- Bottom Game Drawer -->
+        <div class="game-drawer">
+          <div class="drawer-header">
+            <span>자재 선택</span>
+            <div class="rotation-toggle" id="btn-rotate-material">
+              <i class="fa-solid fa-rotate-right"></i> 회전
+            </div>
+          </div>
+          
+          <div class="drawer-items">
+            <!-- BuildMaterial.smallRock -->
+            <div class="material-card active" data-material="smallRock">
+              <div class="mat-icon"><i class="fa-solid fa-circle"></i></div>
+              <span class="mat-label">작은 돌</span>
+              <span class="mat-cost">비용: 1</span>
+            </div>
+            <!-- BuildMaterial.stoneSlab -->
+            <div class="material-card" data-material="stoneSlab">
+              <div class="mat-icon"><i class="fa-solid fa-grip-lines-vertical"></i></div>
+              <span class="mat-label">돌판</span>
+              <span class="mat-cost">비용: 2</span>
+            </div>
+            <!-- BuildMaterial.trackRock -->
+            <div class="material-card" data-material="trackRock">
+              <div class="mat-icon"><i class="fa-solid fa-route"></i></div>
+              <span class="mat-label">트랙 돌</span>
+              <span class="mat-cost">비용: 5</span>
+            </div>
+            <!-- BuildMaterial.bridge -->
+            <div class="material-card" data-material="bridge">
+              <div class="mat-icon"><i class="fa-solid fa-bridge"></i></div>
+              <span class="mat-label">나무다리</span>
+              <span class="mat-cost">비용: 3</span>
+            </div>
+          </div>
+
+          <!-- Simulation Controls -->
+          <div class="drawer-controls">
+            <button class="btn-action btn-secondary" id="btn-camera-reset">
+              <i class="fa-solid fa-video"></i> 카메라 리셋
+            </button>
+            <button class="btn-action btn-danger" id="btn-clear-placements">
+              <i class="fa-solid fa-trash-can"></i> 회수
+            </button>
+            <button class="btn-action btn-success" id="btn-start-simulation">
+              <i class="fa-solid fa-play"></i> 시뮬레이션 시작
+            </button>
+          </div>
+        </div>
+
+        <!-- Success overlay panel -->
+        <div class="overlay-panel" id="panel-success">
+          <div class="overlay-card">
+            <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
+            <h2>항로 개척 성공!</h2>
+            <p>다리가 튼튼하여 캐릭터가 무사히 건너갔습니다.</p>
+            <button class="wood-btn-large" id="btn-success-confirm" style="position:static; transform:none; width:180px; font-size:16px; height:40px; margin-top:10px;">지도 확인</button>
+          </div>
+        </div>
+
+        <!-- Failure overlay panel -->
+        <div class="overlay-panel" id="panel-failure">
+          <div class="overlay-card">
+            <div class="failure-icon"><i class="fa-solid fa-circle-xmark"></i></div>
+            <h2>개척 실패...</h2>
+            <p>다리가 완전히 연결되지 않았거나, 바다로 추락했습니다.</p>
+            <button class="wood-btn-large" id="btn-failure-retry" style="position:static; transform:none; width:180px; font-size:16px; height:40px; margin-top:10px; background:linear-gradient(180deg,#f87171,#dc2626); border-color:#991b1b; box-shadow:0 4px 0 #7f1d1d;">다시 만들기</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CDN Script Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  
+  <!-- Standalone WebGL game logic -->
+  <script src="voyage.js"></script>
+</body>
+</html>
