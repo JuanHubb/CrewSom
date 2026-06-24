@@ -464,8 +464,8 @@ function drawGridVisuals() {
 
   for (let c = 0; c <= BoardGeometry.columns; c++) {
     const fromX = BoardGeometry.startX + c * BoardGeometry.cellX - BoardGeometry.cellX / 2;
-    const fromZ = BoardGeometry.startX;
-    const toZ = BoardGeometry.startX + BoardGeometry.rows * BoardGeometry.cellZ;
+    const fromZ = BoardGeometry.startZ;
+    const toZ = BoardGeometry.startZ + BoardGeometry.rows * BoardGeometry.cellZ;
 
     const points = [
       new THREE.Vector3(fromX, 1.3, -2.5),
@@ -477,7 +477,7 @@ function drawGridVisuals() {
   }
 
   for (let r = 0; r <= BoardGeometry.rows; r++) {
-    const fromZ = BoardGeometry.startX + r * BoardGeometry.cellZ - BoardGeometry.cellZ / 2;
+    const fromZ = BoardGeometry.startZ + r * BoardGeometry.cellZ - BoardGeometry.cellZ / 2;
     const points = [
       new THREE.Vector3(-6.0, 1.3, fromZ),
       new THREE.Vector3(6.0, 1.3, fromZ)
@@ -501,7 +501,7 @@ function drawGridVisuals() {
 // Translate grid coordinates to 3D positions
 function getCellCenter(x, z) {
   const posX = BoardGeometry.startX + x * BoardGeometry.cellX;
-  const posZ = BoardGeometry.startX + z * BoardGeometry.cellZ;
+  const posZ = BoardGeometry.startZ + z * BoardGeometry.cellZ;
 
   // matches Flutter height offset curve
   const normalized = Math.min(1.0, Math.max(0.0, Math.abs(x - 5.5) / 5.5));
@@ -698,7 +698,7 @@ function onPointerMove(event) {
 
 function getCellFromPoint(pt) {
   const localX = pt.x - BoardGeometry.startX;
-  const localZ = pt.z - BoardGeometry.startX;
+  const localZ = pt.z - BoardGeometry.startZ;
 
   const cellX = Math.round(localX / BoardGeometry.cellX);
   const cellZ = Math.round(localZ / BoardGeometry.cellZ);

@@ -45,8 +45,8 @@ body {
 
 #phone-container {
   position: relative;
-  width: 412px;
-  height: 892px;
+  width: 393px;
+  height: 852px;
   background: #000;
   border-radius: 48px;
   padding: 12px;
@@ -535,4 +535,24 @@ body {
 .toast.error {
   border-color: rgba(239, 68, 68, 0.4);
   background: rgba(127, 29, 29, 0.95);
+}
+
+/* Media query for mobile devices */
+@media (max-width: 480px) {
+  body {
+    padding: 0;
+    margin: 0;
+  }
+  #phone-container {
+    width: 100vw !important;
+    height: 100vh !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+  #phone-frame {
+    border-radius: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
 }

@@ -1,25 +1,27 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CrewSom - WebGL Gamified Fitness</title>
-  
+
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
+
   <!-- Core Stylesheet -->
   <link rel="stylesheet" href="style.css?v=3">
 </head>
+
 <body>
 
   <!-- Phone Container Outer Frame -->
   <div id="phone-container">
     <div id="phone-frame">
-      
+
       <!-- Toast Alert System -->
       <div id="toast-container"></div>
-      
+
       <!-- Three.js Canvas -->
       <div id="canvas-wrapper" style="position: absolute; top:0; left:0; width:100%; height:100%;">
         <canvas id="three-canvas"></canvas>
@@ -44,6 +46,29 @@
         </div>
       </div>
 
+      <!-- Active Workout Overlay -->
+      <div id="workout-active-overlay" class="workout-active-overlay">
+        <div class="workout-overlay-header">
+          <span class="workout-overlay-label"><i class="fa-solid fa-fire-flame-simple animate-pulse"></i> 실시간 운동 측정 중</span>
+        </div>
+        <div class="workout-overlay-body">
+          <div class="workout-overlay-stat">
+            <span class="stat-label">시간</span>
+            <span class="stat-val" id="workout-timer-val">00:00</span>
+          </div>
+          <div class="workout-divider"></div>
+          <div class="workout-overlay-stat">
+            <span class="stat-label">강도 (MET)</span>
+            <span class="stat-val" id="workout-met-val">8.3</span>
+          </div>
+          <div class="workout-divider"></div>
+          <div class="workout-overlay-stat">
+            <span class="stat-label">실시간 운동력</span>
+            <span class="stat-val" id="workout-energy-val">0 FP</span>
+          </div>
+        </div>
+      </div>
+
       <!-- 3D Scene Floating Labels (Positioned dynamically over 3D Huts) -->
       <div id="floating-labels-container">
         <!-- North Hut -->
@@ -63,25 +88,112 @@
       </div>
 
       <!-- Start Button ("시작" Wood Button) -->
-      <button class="wood-btn-large" id="btn-start">시작</button>
+      <button class="wood-btn-large" id="btn-start" data-state="stopped">운동 시작</button>
 
       <!-- Bottom Navigation Bar -->
       <nav id="nav-bar">
-        <div class="nav-tab" id="tab-mypage">
-          <i class="fa-regular fa-user"></i>
-          <span>마이페이지</span>
+        <div class="nav-tab" id="tab-crew">
+          <i class="fa-solid fa-user-group"></i>
+          <span>친구</span>
         </div>
         <div class="nav-tab active" id="tab-home">
           <i class="fa-solid fa-home"></i>
           <span>홈</span>
         </div>
-        <div class="nav-tab" id="tab-crew">
-          <i class="fa-solid fa-user-group"></i>
-          <span>친구</span>
+        <div class="nav-tab" id="tab-mypage">
+          <i class="fa-regular fa-user"></i>
+          <span>마이페이지</span>
         </div>
       </nav>
 
       <!-- ================= MODALS SYSTEM ================= -->
+
+      <!-- Workout Result Modal -->
+      <div class="modal-overlay" id="modal-workout-result">
+        <div class="modal-content" style="max-width: 320px; background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);">
+          <div class="modal-header" style="border: none; padding-bottom: 0;">
+            <h3 class="modal-title" style="color: #38bdf8; font-weight: 900;"><i class="fa-solid fa-trophy"></i> 운동 완료!</h3>
+            <button class="modal-close" onclick="closeModal(document.getElementById('modal-workout-result'))"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="modal-body" style="padding: 20px; text-align: center; display: flex; flex-direction: column; gap: 16px;">
+            <div style="font-size: 13px; color: var(--color-text-muted);">오늘도 한 걸음 정복하셨습니다!</div>
+            
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+              <div>
+                <div style="font-size: 10px; color: var(--color-text-muted);">운동 종목</div>
+                <div id="workout-result-type" style="font-size: 18px; font-weight: 800; color: #fff;">러닝 (중강도)</div>
+              </div>
+              
+              <div style="display: flex; justify-content: space-around; margin-top: 8px;">
+                <div>
+                  <div style="font-size: 10px; color: var(--color-text-muted);">시간</div>
+                  <div id="workout-result-duration" style="font-size: 16px; font-weight: 700; color: #fff;">02:15</div>
+                </div>
+                <div>
+                  <div style="font-size: 10px; color: var(--color-text-muted);">평균 MET</div>
+                  <div id="workout-result-met" style="font-size: 16px; font-weight: 700; color: #fff;">8.3</div>
+                </div>
+              </div>
+              
+              <div style="margin-top: 8px; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 12px;">
+                <div style="font-size: 11px; color: #38bdf8; font-weight: 700;">충전된 운동력 (Fitness Points)</div>
+                <div id="workout-result-power" style="font-size: 28px; font-weight: 900; color: #10b981; text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);">+45 FP</div>
+              </div>
+            </div>
+            
+            <button class="wood-btn-large" style="margin-top: 8px; position: static; transform: none; width: 100%;" onclick="closeModal(document.getElementById('modal-workout-result'))">확인</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Buoy (Simplified Workout Selector) Modal -->
+      <div class="modal-overlay" id="modal-buoy-workout">
+        <div class="modal-content" style="max-width: 320px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+          <div class="modal-header" style="border: none; padding-bottom: 0;">
+            <h3 class="modal-title" style="color: #38bdf8; font-weight: 800;"><i class="fa-solid fa-person-running"></i> 간편 운동 선택</h3>
+            <button class="modal-close" onclick="closeModal(document.getElementById('modal-buoy-workout'))"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <span class="form-label" style="font-size: 11px;">운동 종목</span>
+              <div class="radio-group" id="buoy-workout-type-group" style="gap: 8px;">
+                <div class="radio-card active" data-value="RUNNING" style="flex: 1; padding: 10px 4px; border-radius: 12px;">
+                  <i class="fa-solid fa-person-running" style="font-size: 16px;"></i>
+                  <span style="font-size: 11px;">러닝</span>
+                </div>
+                <div class="radio-card" data-value="CYCLING" style="flex: 1; padding: 10px 4px; border-radius: 12px;">
+                  <i class="fa-solid fa-bicycle" style="font-size: 16px;"></i>
+                  <span style="font-size: 11px;">사이클</span>
+                </div>
+                <div class="radio-card" data-value="WALKING" style="flex: 1; padding: 10px 4px; border-radius: 12px;">
+                  <i class="fa-solid fa-person-walking" style="font-size: 16px;"></i>
+                  <span style="font-size: 11px;">걷기</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 0;">
+              <span class="form-label" style="font-size: 11px;">운동 강도</span>
+              <div class="radio-group" id="buoy-workout-intensity-group" style="gap: 8px;">
+                <div class="radio-card" data-value="LOW" style="flex: 1; padding: 10px 4px; border-radius: 12px;">
+                  <i class="fa-solid fa-leaf" style="color: #6ee7b7; font-size: 16px;"></i>
+                  <span style="font-size: 11px;">저강도</span>
+                </div>
+                <div class="radio-card active" data-value="MODERATE" style="flex: 1; padding: 10px 4px; border-radius: 12px;">
+                  <i class="fa-solid fa-bolt" style="color: #fde047; font-size: 16px;"></i>
+                  <span style="font-size: 11px;">중강도</span>
+                </div>
+                <div class="radio-card" data-value="HIGH" style="flex: 1; padding: 10px 4px; border-radius: 12px;">
+                  <i class="fa-solid fa-fire" style="color: #fca5a5; font-size: 16px;"></i>
+                  <span style="font-size: 11px;">고강도</span>
+                </div>
+              </div>
+            </div>
+            
+            <button class="wood-btn-large" id="btn-save-buoy-workout" style="position:static; transform:none; width:100%; font-size:16px; height:44px; margin-top:8px;">운동 시작 설정 완료</button>
+          </div>
+        </div>
+      </div>
 
       <!-- North Modal: Workout Settings (주 운동) -->
       <div class="modal-overlay" id="modal-workout">
@@ -158,7 +270,9 @@
               </select>
             </div>
 
-            <button class="wood-btn-large" id="btn-save-workout" style="position:static; transform:none; width:100%; font-size:18px; margin-top:10px; height:50px;">운동 완료 & 3D 트랙돌 생성</button>
+            <button class="wood-btn-large" id="btn-save-workout"
+              style="position:static; transform:none; width:100%; font-size:18px; margin-top:10px; height:50px;">운동 완료 &
+              3D 트랙돌 생성</button>
           </div>
         </div>
       </div>
@@ -175,7 +289,7 @@
               <div class="subtab active" data-tab="crew-friends">크루 친구</div>
               <div class="subtab" data-tab="all-users">유저 검색</div>
             </div>
-            
+
             <div id="tab-crew-friends-content" class="friends-list">
               <!-- Dynamically generated friend cards -->
             </div>
@@ -217,7 +331,7 @@
                 <p>여기를 탭하거나 이미지를 드래그 앤 드롭하세요</p>
                 <input type="file" id="history-file-input" style="display:none;" accept="image/*">
               </div>
-              
+
               <div class="form-group">
                 <span class="form-label">인증할 가상 운동 정보</span>
                 <select class="select-input" id="select-upload-workout-type">
@@ -227,7 +341,8 @@
                 </select>
               </div>
 
-              <button class="wood-btn-large" id="btn-submit-manual-log" style="position:static; transform:none; width:100%; font-size:18px; height:50px;">기록 저장 및 인증 완료</button>
+              <button class="wood-btn-large" id="btn-submit-manual-log"
+                style="position:static; transform:none; width:100%; font-size:18px; height:50px;">기록 저장 및 인증 완료</button>
             </div>
           </div>
         </div>
@@ -309,7 +424,8 @@
           <div class="modal-body">
             <div class="form-group">
               <span class="form-label">계정 프로필</span>
-              <div style="display:flex; align-items:center; gap:16px; background:rgba(255,255,255,0.03); padding:12px; border-radius:12px;">
+              <div
+                style="display:flex; align-items:center; gap:16px; background:rgba(255,255,255,0.03); padding:12px; border-radius:12px;">
                 <div class="avatar-circle" style="background:#ec4899">HR</div>
                 <div>
                   <div style="font-weight:700;">홍길동 (Wilson Crew)</div>
@@ -317,7 +433,9 @@
                 </div>
               </div>
             </div>
-            <button class="wood-btn-large" id="btn-reset-app-data" style="position:static; transform:none; width:100%; font-size:14px; background:linear-gradient(180deg, #ef4444, #b91c1c); border-color:#7f1d1d; height:44px; margin-top:10px;">앱 데이터 초기화</button>
+            <button class="wood-btn-large" id="btn-reset-app-data"
+              style="position:static; transform:none; width:100%; font-size:14px; background:linear-gradient(180deg, #ef4444, #b91c1c); border-color:#7f1d1d; height:44px; margin-top:10px;">앱
+              데이터 초기화</button>
           </div>
         </div>
       </div>
@@ -368,15 +486,18 @@
             <div class="hq-title" id="lbl-hq-name">CrewSom 윌슨 연합</div>
             <div class="hq-level" id="lbl-hq-level">레벨 1 - 텐트 캠프 (인원: 4명)</div>
           </div>
+          <div class="crew-selector" id="crew-selector-container">
+            <!-- Rendered dynamically in app.js -->
+          </div>
           <div class="subtabs" style="width:100%; margin-top:8px;">
             <div class="subtab active" id="crew-tab-roadmap">주간 로드맵</div>
             <div class="subtab" id="crew-tab-grid">크루 구성원</div>
           </div>
         </div>
-        
+
         <div class="crew-body">
           <div class="swipe-content">
-            
+
             <!-- Page 1: Weekly Progress S-Curve -->
             <div class="swipe-page active" id="page-crew-roadmap">
               <div class="roadmap-container" id="crew-roadmap-viewport">
@@ -396,22 +517,7 @@
                 <i class="fa-solid fa-magnifying-glass"></i>
                 <input type="text" placeholder="친구 이름을 검색해보세요..." id="crew-member-search">
               </div>
-              
-              <div class="crew-profile-header">
-                <div class="crew-profile-header-left">
-                  <i class="fa-solid fa-tent crew-tent-icon"></i>
-                </div>
-                <div class="crew-profile-header-right">
-                  <div class="crew-header-stat heart">
-                    <i class="fa-solid fa-heart"></i> 5
-                  </div>
-                  <div class="crew-header-stat steps">
-                    <i class="fa-solid fa-shoe-prints"></i> 14
-                  </div>
-                  <span class="crew-name-lbl">여정 크루</span>
-                </div>
-              </div>
-              
+
               <div class="journey-grid" id="crew-members-grid">
                 <!-- 3x4 grid slots -->
               </div>
@@ -420,14 +526,14 @@
           </div>
         </div>
       </div>
-
       <!-- ================= BRIDGE GAME VIEWPORT OVERLAY ================= -->
       <div id="bridge-game-overlay">
         <div class="game-header">
           <span class="game-header-title" id="game-title">윌슨 & 로빈슨 다리 건설</span>
-          <button class="modal-close" id="btn-close-game" style="background:rgba(255,255,255,0.15)"><i class="fa-solid fa-xmark"></i></button>
+          <button class="modal-close" id="btn-close-game" style="background:rgba(255,255,255,0.15)"><i
+              class="fa-solid fa-xmark"></i></button>
         </div>
-        
+
         <div class="game-canvas-container">
           <canvas id="bridge-canvas"></canvas>
           <div class="game-instructions" id="game-instruction-bar">
@@ -437,7 +543,8 @@
         </div>
 
         <div class="game-drawer">
-          <span class="drawer-title"><i class="fa-solid fa-toolbox"></i> 사용할 다리 자재 (남은 설치 기회: <span id="game-attempts-val">2</span>/2)</span>
+          <span class="drawer-title"><i class="fa-solid fa-toolbox"></i> 사용할 다리 자재 (남은 설치 기회: <span
+              id="game-attempts-val">2</span>/2)</span>
           <div class="drawer-items" id="game-drawer-items">
             <!-- Material choices from inventory -->
           </div>
@@ -464,4 +571,5 @@
   <!-- Application Logic -->
   <script src="app.js?v=3"></script>
 </body>
+
 </html>

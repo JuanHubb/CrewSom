@@ -7,7 +7,7 @@
 // 1. STATE STORE (Zustand-like Persistence)
 // ==========================================
 const DEFAULT_STATE = {
-  nickname: "홍길동",
+  nickname: "로빈슨",
   hearts: 10,
   steps: 75, // Matches the screenshot
   fitnessPoints: 350,
@@ -38,6 +38,62 @@ const DEFAULT_STATE = {
     { name: "로빈슨", step: 2, role: "대원", color: "#a855f7" },
     { name: "프라이데이", step: 6, role: "대원", color: "#eab308" }
   ],
+  crews: [
+    {
+      id: "crew-1",
+      name: "윌슨 연합",
+      level: 1,
+      levelName: "야영 텐트촌",
+      icon: "fa-tents",
+      members: [
+        { name: "빈츠", step: 5, role: "리더", color: "#60a5fa" },
+        { name: "주린스", step: 4, role: "대원", color: "#f87171" },
+        { name: "펄", step: 3, role: "대원", color: "#34d399" },
+        { name: "로빈슨", step: 2, role: "대원", color: "#a855f7" },
+        { name: "프라이데이", step: 6, role: "대원", color: "#eab308" }
+      ]
+    },
+    {
+      id: "crew-2",
+      name: "로빈슨 클럽",
+      level: 2,
+      levelName: "통나무 오두막",
+      icon: "fa-house-chimney",
+      members: [
+        { name: "톰행크스", step: 1, role: "리더", color: "#8b5a2b" },
+        { name: "척놀랜드", step: 4, role: "대원", color: "#60a5fa" },
+        { name: "윌슨공", step: 3, role: "대원", color: "#f87171" },
+        { name: "피츠제럴드", step: 5, role: "대원", color: "#34d399" }
+      ]
+    },
+    {
+      id: "crew-3",
+      name: "금요 등산회",
+      level: 3,
+      levelName: "벽돌 베이스캠프",
+      icon: "fa-hotel",
+      members: [
+        { name: "한라산", step: 6, role: "리더", color: "#10b981" },
+        { name: "백두산", step: 5, role: "대원", color: "#3b82f6" },
+        { name: "지리산", step: 3, role: "대원", color: "#f59e0b" },
+        { name: "설악산", step: 2, role: "대원", color: "#ef4444" }
+      ]
+    },
+    {
+      id: "crew-4",
+      name: "스마트시티 런",
+      level: 4,
+      levelName: "스마트 시티 센터",
+      icon: "fa-city",
+      members: [
+        { name: "테슬라", step: 7, role: "리더", color: "#3b82f6" },
+        { name: "에디슨", step: 4, role: "대원", color: "#10b981" },
+        { name: "머스크", step: 5, role: "대원", color: "#a855f7" },
+        { name: "뉴턴", step: 3, role: "대원", color: "#ef4444" }
+      ]
+    }
+  ],
+  selectedCrewId: "crew-1",
   mapNodes: [
     { id: "island-1", name: "스타트 캠프", status: "VISITED", x: 60, y: 300 },
     { id: "island-2", name: "모닥불 섬", status: "CURRENT", x: 160, y: 180 },
@@ -55,7 +111,7 @@ const DEFAULT_STATE = {
 };
 
 let state = JSON.parse(localStorage.getItem("crewsom_state"));
-if (!state || !state.history || state.history.length < 5) {
+if (!state || !state.history || state.history.length < 5 || !state.crews) {
   state = DEFAULT_STATE;
   localStorage.setItem("crewsom_state", JSON.stringify(state));
 }
@@ -79,7 +135,7 @@ function showToast(message, type = "info") {
   toast.className = `toast ${type}`;
   toast.innerText = message;
   container.appendChild(toast);
-  
+
   setTimeout(() => {
     toast.style.opacity = "0";
     setTimeout(() => toast.remove(), 300);
@@ -232,7 +288,7 @@ function createIsland() {
     roughness: 0.9,
     flatShading: true
   });
-  
+
   for (let i = 0; i < 18; i++) {
     const rock = new THREE.Mesh(rockGeo, rockMat);
     const angle = (i / 18) * Math.PI * 2;
@@ -240,14 +296,14 @@ function createIsland() {
     const rx = Math.cos(angle) * dist;
     const rz = Math.sin(angle) * dist;
     const ry = -1.5 - Math.random() * 1.0;
-    
+
     rock.position.set(rx, ry, rz);
     rock.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
-    
+
     // Stretch vertically for cliff columns
     const scaleY = 1.2 + Math.random() * 1.4;
     rock.scale.set(0.7 + Math.random() * 0.4, scaleY, 0.7 + Math.random() * 0.4);
-    
+
     rock.castShadow = true;
     rock.receiveShadow = true;
     islandGroup.add(rock);
@@ -260,7 +316,7 @@ function createIsland() {
     roughness: 0.85,
     flatShading: true
   });
-  
+
   for (let i = 0; i < 35; i++) {
     const leaf = new THREE.Mesh(leafGeo, leafMat);
     const angle = Math.random() * Math.PI * 2;
@@ -284,25 +340,25 @@ function addDecorations(parent) {
   // Low-Poly Palm Tree generator matching screenshot
   const createPalmTree = (x, z) => {
     const tree = new THREE.Group();
-    
+
     // Curved trunk segment loop
     const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, flatShading: true, roughness: 0.8 });
     let currY = 0.1;
     let currX = 0;
     const segments = 5;
-    
+
     for (let i = 0; i < segments; i++) {
       const segGeo = new THREE.CylinderGeometry(0.12 - i * 0.01, 0.15 - i * 0.01, 0.35, 5);
       const seg = new THREE.Mesh(segGeo, trunkMat);
       seg.position.set(currX, currY + 0.175, 0);
-      
+
       // Bend slightly outwards
       seg.rotation.z = -x * 0.04;
       seg.rotation.x = z * 0.04;
       seg.castShadow = true;
       seg.receiveShadow = true;
       tree.add(seg);
-      
+
       currY += 0.3;
       currX += -x * 0.015;
     }
@@ -353,7 +409,7 @@ function createBuildings() {
   const darkWoodColor = 0x78350f; // Dark brown roof wood
   const fabricColor = 0xfef08a; // Cream fabric tent
   const stoneColor = 0x94a3b8; // Grey stone portal
-  
+
   const woodMat = new THREE.MeshStandardMaterial({ color: woodColor, flatShading: true, roughness: 0.8 });
   const darkWoodMat = new THREE.MeshStandardMaterial({ color: darkWoodColor, flatShading: true, roughness: 0.85 });
   const fabricMat = new THREE.MeshStandardMaterial({ color: fabricColor, flatShading: true, roughness: 0.9 });
@@ -371,7 +427,7 @@ function createBuildings() {
   roofLeft.position.set(-0.45, 0.9, 0);
   roofLeft.rotation.z = -Math.PI / 4;
   roofLeft.castShadow = true;
-  
+
   const roofRight = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.9, 1.2), darkWoodMat);
   roofRight.position.set(0.45, 0.9, 0);
   roofRight.rotation.z = Math.PI / 4;
@@ -480,7 +536,7 @@ function createBuildings() {
   const symbol = new THREE.Mesh(symbolGeo, stoneMat);
   symbol.position.set(0, 0.5, 0);
   symbol.castShadow = true;
-  
+
   const glowGeo = new THREE.SphereGeometry(0.09, 8, 8);
   const glowMat = new THREE.MeshBasicMaterial({ color: 0x06b6d4 }); // cyan glow
   const glow = new THREE.Mesh(glowGeo, glowMat);
@@ -496,19 +552,19 @@ function createBuildings() {
 // 2.4 Detailed Diamond Railway Track System (Fidelity upgrade matching screenshot)
 function createPaths() {
   const trackGroup = new THREE.Group();
-  
+
   const railMat = new THREE.MeshStandardMaterial({ color: 0x8b5a2b, flatShading: true, roughness: 0.7 }); // wooden rails
   const tieMat = new THREE.MeshStandardMaterial({ color: 0x5c3a21, flatShading: true, roughness: 0.85 });  // dark sleepers
-  
+
   const drawTrackSegment = (x1, z1, x2, z2, numTies) => {
     const p1 = new THREE.Vector3(x1, 0.21, z1);
     const p2 = new THREE.Vector3(x2, 0.21, z2);
     const dir = new THREE.Vector3().subVectors(p2, p1);
     const len = dir.length();
     dir.normalize();
-    
+
     const angle = Math.atan2(dir.x, dir.z);
-    
+
     // Draw 2 parallel rails
     const railGeo = new THREE.BoxGeometry(0.04, 0.04, len);
     const rail1 = new THREE.Mesh(railGeo, railMat);
@@ -517,16 +573,16 @@ function createPaths() {
     rail1.position.z += Math.sin(angle + Math.PI / 2) * 0.14;
     rail1.rotation.y = angle;
     rail1.castShadow = true;
-    
+
     const rail2 = new THREE.Mesh(railGeo, railMat);
     rail2.position.copy(p1).addScaledVector(dir, len / 2);
     rail2.position.x += Math.cos(angle - Math.PI / 2) * 0.14;
     rail2.position.z += Math.sin(angle - Math.PI / 2) * 0.14;
     rail2.rotation.y = angle;
     rail2.castShadow = true;
-    
+
     trackGroup.add(rail1, rail2);
-    
+
     // Draw sleepers
     const tieGeo = new THREE.BoxGeometry(0.46, 0.024, 0.09);
     for (let i = 0; i <= numTies; i++) {
@@ -538,13 +594,13 @@ function createPaths() {
       trackGroup.add(tie);
     }
   };
-  
+
   // 4 Segments linking the huts in a diamond track ring
   drawTrackSegment(0, -2.4, 2.4, 0, 7);
   drawTrackSegment(2.4, 0, 0, 2.4, 7);
   drawTrackSegment(0, 2.4, -2.4, 0, 7);
   drawTrackSegment(-2.4, 0, 0, -2.4, 7);
-  
+
   islandGroup.add(trackGroup);
 }
 
@@ -552,7 +608,7 @@ function createPaths() {
 let fireParticles = [];
 function createCampfire() {
   const fireGroup = new THREE.Group();
-  
+
   // Plaque monument
   const plaqueGeo = new THREE.BoxGeometry(1.2, 0.6, 0.3);
   const plaqueMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, flatShading: true, roughness: 0.85 });
@@ -645,7 +701,7 @@ function resetParticle(p) {
 let buoyMesh;
 function createBuoy() {
   const buoyGroup = new THREE.Group();
-  
+
   const bottomGeo = new THREE.SphereGeometry(0.4, 8, 8, 0, Math.PI * 2, 0, Math.PI / 2);
   const bottomMat = new THREE.MeshStandardMaterial({ color: 0xd92727, flatShading: true, roughness: 0.3 }); // shiny red buoy
   const bottom = new THREE.Mesh(bottomGeo, bottomMat);
@@ -662,7 +718,7 @@ function createBuoy() {
 
   buoyGroup.position.set(0, -1.05, 3.8); // Floats near bottom center
   islandGroup.add(buoyGroup);
-  
+
   buoyMesh = buoyGroup;
   huts["buoy"] = buoyGroup;
   labels["buoy"] = document.getElementById("lbl-buoy");
@@ -674,7 +730,7 @@ function updateParticles(delta) {
     p.position.x += p.userData.speedXZ;
     p.rotation.x += p.userData.rotSpeed * delta;
     p.rotation.y += p.userData.rotSpeed * delta;
-    
+
     // Scale down as it rises
     const t = 1.0 - (p.position.y / 0.95);
     if (t <= 0) {
@@ -689,7 +745,7 @@ function updateParticles(delta) {
 const tempV = new THREE.Vector3();
 function updateLabels() {
   if (!scene) return;
-  
+
   const widthHalf = renderer.domElement.clientWidth / 2;
   const heightHalf = renderer.domElement.clientHeight / 2;
 
@@ -700,7 +756,7 @@ function updateLabels() {
 
     // Get position offset slightly upwards
     tempV.setFromMatrixPosition(obj.matrixWorld);
-    
+
     if (key === "center") tempV.y += 0.8;
     else if (key === "buoy") tempV.y += 0.5;
     else tempV.y += 1.2;
@@ -756,7 +812,7 @@ function animate() {
   updateParticles(delta);
 
   if (controls) controls.update();
-  
+
   renderer.render(scene, camera);
   updateLabels();
 }
@@ -839,10 +895,10 @@ function triggerHutModal(key) {
       modalId = "modal-stage-map";
       break;
     case "buoy":
-      // Buoy opens workout modal as well
+      // Buoy opens simplified workout modal
       targetCamPos.set(0, 1.5, 5);
       targetLookAt.set(0, -1.05, 3.8);
-      modalId = "modal-workout";
+      modalId = "modal-buoy-workout";
       break;
   }
 
@@ -905,7 +961,100 @@ function setupModalTriggers() {
   document.getElementById("lbl-buoy").addEventListener("click", () => triggerHutModal("buoy"));
 
   // Wood Start Button
-  document.getElementById("btn-start").addEventListener("click", () => triggerHutModal("center"));
+  // Workout start/stop button logic
+  let workoutStartTime = null;
+  let workoutTimerInterval = null;
+
+  document.getElementById("btn-start").addEventListener("click", () => {
+    const btn = document.getElementById("btn-start");
+    const buttonState = btn.getAttribute("data-state");
+    if (buttonState === "stopped") {
+      // Start workout
+      workoutStartTime = Date.now();
+      btn.textContent = "중지";
+      btn.setAttribute("data-state", "running");
+
+      // Get settings
+      const typeCard = document.querySelector("#workout-type-group .radio-card.active");
+      const intensityCard = document.querySelector("#workout-intensity-group .radio-card.active");
+      const type = typeCard ? typeCard.dataset.value : "RUNNING";
+      const intensity = intensityCard ? intensityCard.dataset.value : "MODERATE";
+      const met = (MET_VALUES[type] && MET_VALUES[type][intensity]) || 0;
+
+      // Show Active Overlay
+      const overlay = document.getElementById("workout-active-overlay");
+      overlay.classList.add("active");
+      document.getElementById("workout-met-val").innerText = met;
+      document.getElementById("workout-timer-val").innerText = "00:00";
+      document.getElementById("workout-energy-val").innerText = "0 FP";
+
+      workoutTimerInterval = setInterval(() => {
+        const elapsedSec = Math.floor((Date.now() - workoutStartTime) / 1000);
+        const mins = String(Math.floor(elapsedSec / 60)).padStart(2, "0");
+        const secs = String(elapsedSec % 60).padStart(2, "0");
+        document.getElementById("workout-timer-val").innerText = `${mins}:${secs}`;
+        
+        // Calculate dynamic energy: MET * (elapsedSec / 60) * 10
+        const currentEnergy = Math.round(met * (elapsedSec / 60) * 10);
+        document.getElementById("workout-energy-val").innerText = `${currentEnergy} FP`;
+      }, 1000);
+
+    } else {
+      // Stop workout, record data
+      clearInterval(workoutTimerInterval);
+      const endTime = Date.now();
+      const durationSec = Math.round((endTime - workoutStartTime) / 1000);
+      
+      const typeCard = document.querySelector("#workout-type-group .radio-card.active");
+      const intensityCard = document.querySelector("#workout-intensity-group .radio-card.active");
+      const type = typeCard ? typeCard.dataset.value : "RUNNING";
+      const intensity = intensityCard ? intensityCard.dataset.value : "MODERATE";
+      const met = (MET_VALUES[type] && MET_VALUES[type][intensity]) || 0;
+      
+      // Calculate workout power
+      const workoutPower = Math.round(met * (durationSec / 60) * 10);
+      
+      // Update history in state
+      const dateStr = new Date().toISOString().replace("T", " ").substring(0, 16);
+      const newLog = {
+        id: "hist-" + Date.now(),
+        type: type,
+        intensity: intensity,
+        duration: Math.round(durationSec / 60) || 1, // minutes
+        met: met,
+        points: workoutPower,
+        date: dateStr,
+        photo: null
+      };
+      
+      state.history.unshift(newLog);
+      state.fitnessPoints += workoutPower;
+      saveState();
+      
+      // Update UI
+      renderHistory();
+      renderWarehouse();
+      
+      // Reset active overlay
+      const overlay = document.getElementById("workout-active-overlay");
+      overlay.classList.remove("active");
+      
+      // Show Workout Result Modal
+      document.getElementById("workout-result-type").innerText = `${type === "RUNNING" ? "러닝" : type === "CYCLING" ? "사이클" : "걷기"} (${intensity === "LOW" ? "저강도" : intensity === "MODERATE" ? "중강도" : "고강도"})`;
+      
+      const resultMins = String(Math.floor(durationSec / 60)).padStart(2, "0");
+      const resultSecs = String(durationSec % 60).padStart(2, "0");
+      document.getElementById("workout-result-duration").innerText = `${resultMins}:${resultSecs}`;
+      document.getElementById("workout-result-met").innerText = met;
+      document.getElementById("workout-result-power").innerText = `+${workoutPower} FP`;
+      
+      openModal(document.getElementById("modal-workout-result"));
+      
+      // Reset button UI
+      btn.textContent = "운동 시작";
+      btn.setAttribute("data-state", "stopped");
+    }
+  });
 
   // Settings HUD click
   document.getElementById("btn-settings-hud").addEventListener("click", () => openModal("modal-settings"));
@@ -925,7 +1074,7 @@ function setupModalTriggers() {
       tab.classList.add("active");
 
       const tabTarget = tab.getAttribute("data-tab");
-      
+
       // Hide all siblings content
       if (tabTarget === "crew-friends") {
         document.getElementById("tab-crew-friends-content").style.display = "flex";
@@ -950,18 +1099,47 @@ function setupModalTriggers() {
   });
 
   // North (Workout setup) choices
-  const bindRadioGroup = (groupId, stateField) => {
-    const cards = document.getElementById(groupId).querySelectorAll(".radio-card");
+  const bindRadioGroup = (groupId, stateField, otherGroupId) => {
+    const container = document.getElementById(groupId);
+    if (!container) return;
+    const cards = container.querySelectorAll(".radio-card");
     cards.forEach(card => {
       card.addEventListener("click", () => {
         cards.forEach(c => c.classList.remove("active"));
         card.classList.add("active");
-        state.workoutSettings[stateField] = card.getAttribute("data-value");
+        const val = card.getAttribute("data-value");
+        state.workoutSettings[stateField] = val;
+        
+        // Sync with the other group if provided
+        if (otherGroupId) {
+          const otherContainer = document.getElementById(otherGroupId);
+          if (otherContainer) {
+            const otherCards = otherContainer.querySelectorAll(".radio-card");
+            otherCards.forEach(oc => {
+              if (oc.getAttribute("data-value") === val) {
+                oc.classList.add("active");
+              } else {
+                oc.classList.remove("active");
+              }
+            });
+          }
+        }
       });
     });
   };
-  bindRadioGroup("workout-type-group", "type");
-  bindRadioGroup("workout-intensity-group", "intensity");
+  bindRadioGroup("workout-type-group", "type", "buoy-workout-type-group");
+  bindRadioGroup("workout-intensity-group", "intensity", "buoy-workout-intensity-group");
+  bindRadioGroup("buoy-workout-type-group", "type", "workout-type-group");
+  bindRadioGroup("buoy-workout-intensity-group", "intensity", "workout-intensity-group");
+
+  const btnSaveBuoy = document.getElementById("btn-save-buoy-workout");
+  if (btnSaveBuoy) {
+    btnSaveBuoy.addEventListener("click", () => {
+      saveState();
+      closeModal(document.getElementById("modal-buoy-workout"));
+      showToast("간편 운동 설정이 완료되었습니다! 아래 '운동 시작' 버튼을 눌러 운동을 측정하세요.", "success");
+    });
+  }
 
   const durSlider = document.getElementById("slider-duration");
   durSlider.addEventListener("input", (e) => {
@@ -1073,7 +1251,7 @@ function renderFriends() {
     const card = document.createElement("div");
     card.className = "friend-card";
     card.innerHTML = `
-      <div class="avatar-circle" style="background:${f.color}">${f.name.substring(0,2)}</div>
+      <div class="avatar-circle" style="background:${f.color}">${f.name.substring(0, 2)}</div>
       <div class="friend-info">
         <div class="friend-name">${f.name}</div>
         <div class="friend-status">${f.status}</div>
@@ -1087,13 +1265,13 @@ function renderFriends() {
 
 function showFriendProfile(friend) {
   const container = document.getElementById("modal-profile-info");
-  
+
   const grassHTML = generateContributionGrassHTML();
   const feedHTML = generateInstaFeedHTML(friend.name);
 
   container.innerHTML = `
     <div style="display:flex; align-items:center; gap:16px; width:100%; border-bottom:1px solid var(--glass-border); padding-bottom:14px;">
-      <div class="avatar-circle" style="background:${friend.color}; width:56px; height:56px; font-size:22px; flex-shrink:0;">${friend.name.substring(0,2)}</div>
+      <div class="avatar-circle" style="background:${friend.color}; width:56px; height:56px; font-size:22px; flex-shrink:0;">${friend.name.substring(0, 2)}</div>
       <div style="flex:1;">
         <h2 style="font-weight:900; font-size:18px;">${friend.name}</h2>
         <p style="color:var(--color-text-muted); font-size:11px; margin-top:2px;">${friend.status}</p>
@@ -1117,15 +1295,15 @@ function showFriendProfile(friend) {
 
 function showOwnProfile() {
   const container = document.getElementById("modal-profile-info");
-  
+
   const grassHTML = generateContributionGrassHTML();
-  const feedHTML = generateInstaFeedHTML("홍길동");
+  const feedHTML = generateInstaFeedHTML("로빈슨");
 
   container.innerHTML = `
     <div style="display:flex; align-items:center; gap:16px; width:100%; border-bottom:1px solid var(--glass-border); padding-bottom:14px;">
       <div class="avatar-circle" style="background:#ec4899; width:56px; height:56px; font-size:22px; flex-shrink:0;">홍길</div>
       <div style="flex:1;">
-        <h2 style="font-weight:900; font-size:18px;">홍길동 (나)</h2>
+        <h2 style="font-weight:900; font-size:18px;">로빈슨 (나)</h2>
         <p style="color:var(--color-text-muted); font-size:11px; margin-top:2px;">오늘도 열심히 건강하게 운동하는 중! 🏃‍♂️</p>
         <div style="display:flex; gap:12px; margin-top:4px; font-size:11px; font-weight:700; color:var(--color-success);">
           <span>활동지수: ${state.steps}</span>
@@ -1148,15 +1326,15 @@ function showOwnProfile() {
 function renderOwnProfilePage() {
   const container = document.getElementById("mypage-body-content");
   if (!container) return;
-  
+
   const grassHTML = generateContributionGrassHTML();
-  const feedHTML = generateInstaFeedHTML("홍길동");
+  const feedHTML = generateInstaFeedHTML("로빈슨");
 
   container.innerHTML = `
     <div style="display:flex; align-items:center; gap:16px; width:100%; border-bottom:1px solid var(--glass-border); padding-bottom:14px;">
       <div class="avatar-circle" style="background:#ec4899; width:56px; height:56px; font-size:22px; flex-shrink:0; border: 2.5px solid #000; box-shadow: 0 4px 0 #000; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:900;">홍길</div>
       <div style="flex:1;">
-        <h2 style="font-weight:900; font-size:18px; color: #fff;">홍길동 (나)</h2>
+        <h2 style="font-weight:900; font-size:18px; color: #fff;">로빈슨 (나)</h2>
         <p style="color:var(--color-text-muted); font-size:12px; margin-top:2px;">오늘도 열심히 건강하게 운동하는 중! 🏃‍♂️</p>
         <div style="display:flex; gap:12px; margin-top:4px; font-size:11px; font-weight:700; color:var(--color-success);">
           <span>활동지수: ${state.steps}</span>
@@ -1258,7 +1436,7 @@ function generateInstaFeedHTML(name) {
   WORKOUT_FEED_DATA.forEach((w, index) => {
     gridHTML += `
       <div class="insta-photo" onclick="showWorkoutDetail(${index})">
-        <img src="${w.imageUrl}" class="insta-photo-img" style="width:100%; height:100%; object-fit:cover; border-radius:12px;" />
+        <img src="${w.imageUrl}" class="insta-photo-img feed-img" loading="lazy" style="width:100%; height:100%; object-fit:cover; border-radius:12px;" />
         <i class="fa-solid fa-${w.icon}" style="position:absolute; top:8px; right:8px; font-size:12px; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.8);"></i>
         <span class="insta-photo-tag">${w.tag}</span>
         <div class="insta-overlay">
@@ -1272,7 +1450,7 @@ function generateInstaFeedHTML(name) {
 
   return `
     <div class="insta-grid-container">
-      <span class="form-label">오운완 피드 Grid (인스타형 3열)</span>
+      <span class="form-label">운동 피드</span>
       <div class="insta-grid">
         ${gridHTML}
       </div>
@@ -1283,10 +1461,10 @@ function generateInstaFeedHTML(name) {
 function showWorkoutDetail(index) {
   const w = WORKOUT_FEED_DATA[index];
   const container = document.getElementById("modal-workout-detail-content");
-  
+
   const intensityLabel = w.intensity === "LOW" ? "저강도" : w.intensity === "MODERATE" ? "중강도" : "고강도";
   const typeLabel = w.type === "RUNNING" ? "러닝" : w.type === "CYCLING" ? "사이클" : "걷기";
-  
+
   container.innerHTML = `
     <div class="workout-detail-card" style="display:flex; flex-direction:column; gap:16px;">
       <img src="${w.imageUrl}" style="width:100%; height:200px; object-fit:cover; border-radius:16px; border:2px solid var(--glass-border);" />
@@ -1382,7 +1560,7 @@ function renderWarehouse() {
 function renderRoadmap() {
   const svg = document.getElementById("crew-roadmap-svg");
   const viewport = document.getElementById("crew-roadmap-viewport");
-  
+
   // Clear old nodes and avatars
   viewport.querySelectorAll(".roadmap-node, .roadmap-avatar").forEach(el => el.remove());
 
@@ -1399,7 +1577,7 @@ function renderRoadmap() {
   // Draw Path line
   let pathD = `M ${points[0].x} ${points[0].y} `;
   for (let i = 1; i < points.length; i++) {
-    const pPrev = points[i-1];
+    const pPrev = points[i - 1];
     const pCurr = points[i];
     const cpX1 = pPrev.x + (pCurr.x - pPrev.x) * 0.5;
     const cpY1 = pPrev.y;
@@ -1453,22 +1631,22 @@ function renderRoadmap() {
     const idx = parseInt(stepKey);
     const node = points[idx - 1];
     const membersAtNode = stepOffsets[stepKey];
-    
+
     membersAtNode.forEach((m, offsetIdx) => {
       const av = document.createElement("div");
       av.className = "roadmap-avatar";
       av.style.background = m.color;
       av.style.cursor = "pointer";
-      
+
       // Offset multiple avatars slightly so they don't overlap fully
       const offX = (offsetIdx - (membersAtNode.length - 1) / 2) * 22;
       const offY = -28;
-      
+
       av.style.left = `${node.x + offX}px`;
       av.style.top = `${node.y + offY}px`;
       av.innerText = m.name.substring(0, 2);
       av.title = `${m.name} (${m.role}) - ${m.step}단계`;
-      
+
       // Click avatar to show profile feed
       av.addEventListener("click", (e) => {
         e.stopPropagation(); // Avoid triggering node click
@@ -1489,24 +1667,49 @@ function renderRoadmap() {
 function updateHQBuildingVisual() {
   const iconEl = document.getElementById("hq-building-icon");
   const lvlEl = document.getElementById("lbl-hq-level");
-  if (!iconEl || !lvlEl) return;
+  const titleEl = document.getElementById("lbl-hq-name");
+  if (!iconEl || !lvlEl || !titleEl) return;
 
-  const count = state.crewMembers.length;
-  iconEl.className = "hq-building-img fa-solid";
-
-  if (count <= 3) {
-    iconEl.classList.add("fa-tents");
-    lvlEl.innerText = `레벨 1 - 야영 텐트촌 (인원: ${count}명)`;
-  } else if (count <= 5) {
-    iconEl.classList.add("fa-house-chimney");
-    lvlEl.innerText = `레벨 2 - 통나무 오두막 (인원: ${count}명)`;
-  } else if (count <= 7) {
-    iconEl.classList.add("fa-hotel");
-    lvlEl.innerText = `레벨 3 - 벽돌 베이스캠프 (인원: ${count}명)`;
-  } else {
-    iconEl.classList.add("fa-city");
-    lvlEl.innerText = `레벨 4 - 스마트 시티 센터 (인원: ${count}명)`;
+  const crew = state.crews.find(c => c.id === state.selectedCrewId);
+  if (crew) {
+    iconEl.className = `hq-building-img fa-solid ${crew.icon}`;
+    titleEl.innerText = crew.name;
+    const count = state.crewMembers.length;
+    lvlEl.innerText = `레벨 ${crew.level} - ${crew.levelName} (인원: ${count}명)`;
   }
+}
+
+function renderCrewSelectors() {
+  const container = document.getElementById("crew-selector-container");
+  if (!container) return;
+  
+  container.innerHTML = "";
+  
+  state.crews.forEach(crew => {
+    const card = document.createElement("div");
+    card.className = `crew-select-card ${state.selectedCrewId === crew.id ? 'active' : ''}`;
+    card.innerHTML = `
+      <i class="fa-solid ${crew.icon}"></i>
+      <span>${crew.name}</span>
+    `;
+    card.addEventListener("click", () => {
+      selectCrew(crew.id);
+    });
+    container.appendChild(card);
+  });
+}
+
+function selectCrew(crewId) {
+  state.selectedCrewId = crewId;
+  const crew = state.crews.find(c => c.id === crewId);
+  if (crew) {
+    state.crewMembers = crew.members;
+  }
+  saveState();
+  
+  renderCrewSelectors();
+  renderRoadmap();
+  renderCrewGrid();
 }
 
 function renderCrewGrid() {
@@ -1524,7 +1727,7 @@ function renderCrewGrid() {
   for (let i = 0; i < 12; i++) {
     const card = document.createElement("div");
     card.className = "journey-card";
-    
+
     if (i < memberCount) {
       const m = filteredMembers[i];
       card.innerHTML = `
@@ -1556,23 +1759,28 @@ function renderCrewGrid() {
 
 function inviteCrewMemberSlot() {
   showToast("크루 초대 기능은 활성 멤버 9명 한도까지 확장 가능합니다.", "info");
-  
+
   // Add a mock member to show building evolution
   if (state.crewMembers.length < 9) {
     const names = ["철수", "영희", "민수", "정은", "지훈"];
     const colors = ["#8b5a2b", "#3b82f6", "#10b981", "#c084fc", "#f43f5e"];
     const randName = names[Math.floor(Math.random() * names.length)];
     const randColor = colors[Math.floor(Math.random() * colors.length)];
-    
+
     const newMember = {
       name: randName + (state.crewMembers.length + 1),
       step: Math.floor(Math.random() * 5) + 1,
       role: "대원",
       color: randColor
     };
-    
+
     state.crewMembers.push(newMember);
-    
+
+    const currCrew = state.crews.find(c => c.id === state.selectedCrewId);
+    if (currCrew) {
+      currCrew.members = state.crewMembers;
+    }
+
     // Also push to friends so their profile feed is accessible
     state.friends.push({
       name: `${newMember.name} (Friend)`,
@@ -1580,7 +1788,7 @@ function inviteCrewMemberSlot() {
       step: newMember.step,
       color: newMember.color
     });
-    
+
     saveState();
     renderCrewGrid();
     renderRoadmap();
@@ -1594,7 +1802,7 @@ function inviteCrewMemberSlot() {
 function renderStageMap() {
   const container = document.getElementById("map-nodes-view");
   const svg = document.getElementById("map-svg-connections");
-  
+
   // Clear nodes, keeping SVG
   container.querySelectorAll(".map-node").forEach(n => n.remove());
 
@@ -1606,14 +1814,14 @@ function renderStageMap() {
   // Draw connections
   for (let i = 0; i < state.mapNodes.length - 1; i++) {
     const nStart = state.mapNodes[i];
-    const nEnd = state.mapNodes[i+1];
-    
+    const nEnd = state.mapNodes[i + 1];
+
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
     line.setAttribute("x1", `${nStart.x}`);
     line.setAttribute("y1", `${nStart.y}`);
     line.setAttribute("x2", `${nEnd.x}`);
     line.setAttribute("y2", `${nEnd.y}`);
-    
+
     // Set style depending on node status
     if (nStart.status === "VISITED" && nEnd.status === "VISITED") {
       line.setAttribute("stroke", "var(--color-success)");
@@ -1703,10 +1911,11 @@ function switchTab(tab) {
 
   const crewView = document.getElementById("crew-view");
   const mypageView = document.getElementById("mypage-view");
-  
+
   if (tab === "crew") {
     crewView.classList.add("active");
     mypageView.classList.remove("active");
+    renderCrewSelectors();
     renderRoadmap();
     renderCrewGrid();
   } else if (tab === "home") {
@@ -1736,7 +1945,7 @@ let simulationInProgress = false;
 function enterBridgeGame(targetNode) {
   // Hide stage map modal
   closeModal(document.getElementById("modal-stage-map"));
-  
+
   // Show Bridge Game Panel
   const overlay = document.getElementById("bridge-game-overlay");
   overlay.classList.add("active");
@@ -1867,7 +2076,7 @@ function initGameCanvas() {
   const gameAnimate = () => {
     if (!gameScene) return;
     requestAnimationFrame(gameAnimate);
-    
+
     // Wave water slightly
     water.position.y = -4.5 + Math.sin(gameClock.getElapsedTime() * 3.0) * 0.05;
 
@@ -1979,7 +2188,7 @@ function placeMaterialMesh(type, x, y, stoneData = null) {
 // Reset bridge elements
 document.getElementById("btn-game-clear").addEventListener("click", () => {
   if (simulationInProgress) return;
-  
+
   // Return materials to local variables
   placedMaterials.forEach(p => {
     if (p.type === "plank") {
@@ -2022,7 +2231,7 @@ document.getElementById("btn-close-game").addEventListener("click", () => {
   gameScene = null;
   gameCamera = null;
   gameRenderer = null;
-  
+
   document.getElementById("bridge-game-overlay").classList.remove("active");
   triggerHutModal("center"); // zoom back to map
 });
@@ -2043,7 +2252,7 @@ function updatePhysicsSim(dt) {
   let cy = characterMesh.position.y;
 
   cx += charVelX * step;
-  
+
   // Apply gravity
   charVelY += gravity * step;
   cy += charVelY * step;
@@ -2095,20 +2304,22 @@ function updatePhysicsSim(dt) {
   if (cy <= -3.8) {
     simulationInProgress = false;
     showToast("시뮬레이션 실패! 캐릭터가 절벽 아래로 떨어졌습니다.", "error");
-    
+
     // Animate splash
-    gsap.to(characterMesh.scale, { x: 0, y: 0, duration: 0.3, onComplete: () => {
-      // Reset position
-      characterMesh.position.set(startIslandX, 0, 0);
-      characterMesh.scale.set(1, 1, 1);
-    }});
+    gsap.to(characterMesh.scale, {
+      x: 0, y: 0, duration: 0.3, onComplete: () => {
+        // Reset position
+        characterMesh.position.set(startIslandX, 0, 0);
+        characterMesh.scale.set(1, 1, 1);
+      }
+    });
   }
 
   // Check Success (Landed on target island)
   if (cx >= targetIslandX) {
     simulationInProgress = false;
     showToast("성공! 다리를 안정적으로 건넜습니다! 🎉", "success");
-    
+
     // Jump animation
     gsap.to(characterMesh.position, { y: 0.8, duration: 0.25, yoyo: true, repeat: 1 });
 
@@ -2122,14 +2333,14 @@ function updatePhysicsSim(dt) {
     state.woodenPlanks = gamePlanksCount;
     state.trackStones = gameStones;
     state.remainingBridgeAttempts = 2; // Restore attempts for next level
-    
+
     saveState();
-    
+
     setTimeout(() => {
       // Clean and close game
       gameScene = null;
       document.getElementById("bridge-game-overlay").classList.remove("active");
-      
+
       // Open stage map to see update
       openModal("modal-stage-map");
       renderStageMap();
@@ -2156,6 +2367,7 @@ window.addEventListener("DOMContentLoaded", () => {
   renderFriends();
   renderHistory();
   renderWarehouse();
+  renderCrewSelectors();
   renderRoadmap();
   renderCrewGrid();
   renderStageMap();
@@ -2170,12 +2382,12 @@ window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("btn-submit-manual-log").addEventListener("click", () => {
     const uploadSelect = document.getElementById("select-upload-workout-type");
     const selectedWorkoutVal = uploadSelect.value;
-    
+
     // Add logged workout
     let duration = 30;
     let intensity = "MODERATE";
     let met = MET_VALUES[selectedWorkoutVal][intensity];
-    
+
     if (selectedWorkoutVal === "CYCLING") {
       duration = 45; intensity = "HIGH"; met = MET_VALUES[selectedWorkoutVal][intensity];
     } else if (selectedWorkoutVal === "WALKING") {
@@ -2184,7 +2396,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const points = Math.round(met * duration * 0.5);
     const dateStr = new Date().toISOString().replace("T", " ").substring(0, 16);
-    
+
     const newLog = {
       id: "hist-manual-" + Date.now(),
       type: selectedWorkoutVal,
@@ -2199,7 +2411,7 @@ window.addEventListener("DOMContentLoaded", () => {
     state.history.unshift(newLog);
     state.fitnessPoints += points;
     saveState();
-    
+
     showToast("오운완 사진 인증 및 기록 등록이 완료되었습니다!", "success");
     closeModal(document.getElementById("modal-history-list"));
     renderHistory();

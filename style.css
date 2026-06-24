@@ -49,8 +49,8 @@ body {
 /* Phone Bezel Container */
 #phone-container {
   position: relative;
-  width: 412px;
-  height: 892px;
+  width: 393px;
+  height: 852px;
   background: #000;
   border-radius: 48px;
   padding: 12px;
@@ -1923,6 +1923,178 @@ input:checked + .slider:before {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+/* ==========================================
+ * CREW SELECTOR & WORKOUT OVERLAY STYLES
+ * ========================================== */
+.crew-selector {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  width: 100%;
+  padding: 4px 8px 10px 8px;
+  scrollbar-width: none; /* Hide scrollbar for Firefox */
+}
+.crew-selector::-webkit-scrollbar {
+  display: none; /* Hide scrollbar for Chrome/Safari */
+}
+
+.crew-select-card {
+  flex: 0 0 auto;
+  width: 72px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.crew-select-card i {
+  font-size: 24px;
+  color: var(--color-text-muted);
+  transition: color 0.3s ease;
+}
+
+.crew-select-card span {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.crew-select-card.active {
+  background: rgba(96, 165, 250, 0.15);
+  border-color: #60a5fa;
+  box-shadow: 0 0 10px rgba(96, 165, 250, 0.4);
+  transform: translateY(-2px);
+}
+
+.crew-select-card.active i {
+  color: #60a5fa;
+  filter: drop-shadow(0 0 4px rgba(96, 165, 250, 0.6));
+}
+
+.crew-select-card.active span {
+  color: #fff;
+  font-weight: 700;
+}
+
+/* Workout Active Overlay */
+.workout-active-overlay {
+  position: absolute;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  width: 90%;
+  max-width: 350px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(96, 165, 250, 0.2);
+  border-radius: 16px;
+  padding: 10px 14px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.workout-active-overlay.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.workout-overlay-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.workout-overlay-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #38bdf8;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  text-transform: uppercase;
+}
+
+.workout-overlay-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.workout-overlay-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.workout-overlay-stat .stat-label {
+  font-size: 9px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.workout-overlay-stat .stat-val {
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+.workout-divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.animate-pulse {
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+/* Media query for mobile devices */
+@media (max-width: 480px) {
+  body {
+    padding: 0;
+    margin: 0;
+  }
+  #phone-container {
+    width: 100vw !important;
+    height: 100vh !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+  #phone-frame {
+    border-radius: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
 }
 
 
