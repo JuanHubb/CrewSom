@@ -49,8 +49,8 @@ body {
 /* Phone Bezel Container */
 #phone-container {
   position: relative;
-  width: 393px;
-  height: 852px;
+  width: 430px;
+  height: 915px;
   background: #000;
   border-radius: 48px;
   padding: 12px;
