@@ -74,7 +74,7 @@ const BoardGeometry = {
   cellX: 1.0,  // Scale of cell spacing
   cellZ: 1.0,
   startX: -5.5,
-  startZ: -2.0,
+  startZ: -0.5,
   reefs: [[2, 0], [3, 4], [8, 0], [9, 4]]
 };
 
@@ -454,7 +454,7 @@ function buildBridgeScene() {
   const charGeo = new THREE.SphereGeometry(0.35, 12, 12);
   const charMat = new THREE.MeshStandardMaterial({ color: 0xec4899, roughness: 0.3, flatShading: true });
   characterMesh = new THREE.Mesh(charGeo, charMat);
-  characterMesh.position.set(-7.5, 1.85, 0);
+  characterMesh.position.set(-7.5, 1.85, BoardGeometry.startZ + 2 * BoardGeometry.cellZ);
   characterMesh.castShadow = true;
   gameBoardGroup.add(characterMesh);
 }
@@ -464,12 +464,12 @@ function drawGridVisuals() {
 
   for (let c = 0; c <= BoardGeometry.columns; c++) {
     const fromX = BoardGeometry.startX + c * BoardGeometry.cellX - BoardGeometry.cellX / 2;
-    const fromZ = BoardGeometry.startZ;
-    const toZ = BoardGeometry.startZ + BoardGeometry.rows * BoardGeometry.cellZ;
+    const fromZ = BoardGeometry.startZ - BoardGeometry.cellZ / 2;
+    const toZ = BoardGeometry.startZ + BoardGeometry.rows * BoardGeometry.cellZ - BoardGeometry.cellZ / 2;
 
     const points = [
-      new THREE.Vector3(fromX, 1.3, -2.5),
-      new THREE.Vector3(fromX, 1.3, 2.5)
+      new THREE.Vector3(fromX, 1.3, fromZ),
+      new THREE.Vector3(fromX, 1.3, toZ)
     ];
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
     const line = new THREE.Line(geometry, lineMat);
@@ -478,9 +478,11 @@ function drawGridVisuals() {
 
   for (let r = 0; r <= BoardGeometry.rows; r++) {
     const fromZ = BoardGeometry.startZ + r * BoardGeometry.cellZ - BoardGeometry.cellZ / 2;
+    const fromX = BoardGeometry.startX - BoardGeometry.cellX / 2;
+    const toX = BoardGeometry.startX + BoardGeometry.columns * BoardGeometry.cellX - BoardGeometry.cellX / 2;
     const points = [
-      new THREE.Vector3(-6.0, 1.3, fromZ),
-      new THREE.Vector3(6.0, 1.3, fromZ)
+      new THREE.Vector3(fromX, 1.3, fromZ),
+      new THREE.Vector3(toX, 1.3, fromZ)
     ];
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
     const line = new THREE.Line(geometry, lineMat);
@@ -922,8 +924,9 @@ function startSimulation() {
 // DFS/BFS pathfinder to check grid connections
 function findCrossingPath() {
   const steps = [];
+  const charZ = BoardGeometry.startZ + 2 * BoardGeometry.cellZ;
   // start position
-  steps.push({ x: -7.5, y: 1.85, z: 0 });
+  steps.push({ x: -7.5, y: 1.85, z: charZ });
 
   // Column by column search
   let currentZ = 2; // Middle row (row 2)
@@ -958,8 +961,8 @@ function findCrossingPath() {
         steps.push({ x: center.x + 0.8, y: -2.0, z: center.z, fall: true }); // drop animation flag
       } else {
         // Drop straight from start cliff
-        steps.push({ x: -5.0, y: 1.5, z: 0 });
-        steps.push({ x: -4.5, y: -2.0, z: 0, fall: true });
+        steps.push({ x: -5.0, y: 1.5, z: charZ });
+        steps.push({ x: -4.5, y: -2.0, z: charZ, fall: true });
       }
       break;
     }
@@ -967,7 +970,7 @@ function findCrossingPath() {
 
   // If path is successful, add final land position
   if (!failed) {
-    steps.push({ x: 7.5, y: 1.85, z: 0 });
+    steps.push({ x: 7.5, y: 1.85, z: charZ });
   }
 
   return { steps, success: !failed };
@@ -1051,7 +1054,7 @@ function confirmSuccess() {
 
 function retryFailure() {
   document.getElementById('panel-failure').classList.remove('active');
-  characterMesh.position.set(-7.5, 1.85, 0); // Respawn
+  characterMesh.position.set(-7.5, 1.85, BoardGeometry.startZ + 2 * BoardGeometry.cellZ); // Respawn
   clearPlacements();
 }
 

@@ -83,9 +83,10 @@
         <div class="floating-bubble center-bubble" id="lbl-center" style="top: 48%; left: 50%;">
           윌슨 & 로빈슨 <span style="margin-left: 5px; color: var(--color-danger); font-weight:900;">D-5</span>
         </div>
-        <!-- Red Buoy in the Water -->
-        <div class="floating-bubble buoy-bubble" id="lbl-buoy" style="top: 70%; left: 50%;">종목</div>
       </div>
+
+      <!-- Buoy Sport Change Button -->
+      <button id="btn-buoy-sport"><i class="fa-solid fa-person-running"></i> 운동 종목 변경</button>
 
       <!-- Start Button ("시작" Wood Button) -->
       <button class="wood-btn-large" id="btn-start" data-state="stopped">운동 시작</button>
@@ -156,20 +157,18 @@
           <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
             <div class="form-group" style="margin-bottom: 0;">
               <span class="form-label" style="font-size: 11px;">운동 종목</span>
-              <div class="radio-group" id="buoy-workout-type-group" style="gap: 8px;">
-                <div class="radio-card active" data-value="RUNNING" style="flex: 1; padding: 10px 4px; border-radius: 12px;">
-                  <i class="fa-solid fa-person-running" style="font-size: 16px;"></i>
-                  <span style="font-size: 11px;">러닝</span>
+                <div class="radio-card active" data-value="COURSE" style="flex: 1; padding: 10px 4px; border-radius: 12px;">
+                  <i class="fa-solid fa-route" style="font-size: 16px;"></i>
+                  <span style="font-size: 11px;">코스 운동</span>
                 </div>
-                <div class="radio-card" data-value="CYCLING" style="flex: 1; padding: 10px 4px; border-radius: 12px;">
-                  <i class="fa-solid fa-bicycle" style="font-size: 16px;"></i>
-                  <span style="font-size: 11px;">사이클</span>
+                <div class="radio-card" data-value="INDOOR" style="flex: 1; padding: 10px 4px; border-radius: 12px;">
+                  <i class="fa-solid fa-dumbbell" style="font-size: 16px;"></i>
+                  <span style="font-size: 11px;">실내운동</span>
                 </div>
-                <div class="radio-card" data-value="WALKING" style="flex: 1; padding: 10px 4px; border-radius: 12px;">
-                  <i class="fa-solid fa-person-walking" style="font-size: 16px;"></i>
-                  <span style="font-size: 11px;">걷기</span>
+                <div class="radio-card" data-value="OUTDOOR" style="flex: 1; padding: 10px 4px; border-radius: 12px;">
+                  <i class="fa-solid fa-mountain-sun" style="font-size: 16px;"></i>
+                  <span style="font-size: 11px;">실외운동</span>
                 </div>
-              </div>
             </div>
             
             <div class="form-group" style="margin-bottom: 0;">
@@ -206,17 +205,17 @@
             <div class="form-group">
               <span class="form-label">운동 종목 선택</span>
               <div class="radio-group" id="workout-type-group">
-                <div class="radio-card active" data-value="RUNNING">
-                  <i class="fa-solid fa-person-running"></i>
-                  <span>러닝</span>
+                <div class="radio-card active" data-value="COURSE">
+                  <i class="fa-solid fa-route"></i>
+                  <span>코스 운동</span>
                 </div>
-                <div class="radio-card" data-value="CYCLING">
-                  <i class="fa-solid fa-bicycle"></i>
-                  <span>사이클</span>
+                <div class="radio-card" data-value="INDOOR">
+                  <i class="fa-solid fa-dumbbell"></i>
+                  <span>실내운동</span>
                 </div>
-                <div class="radio-card" data-value="WALKING">
-                  <i class="fa-solid fa-person-walking"></i>
-                  <span>걷기</span>
+                <div class="radio-card" data-value="OUTDOOR">
+                  <i class="fa-solid fa-mountain-sun"></i>
+                  <span>실외운동</span>
                 </div>
               </div>
             </div>
@@ -290,8 +289,13 @@
               <div class="subtab" data-tab="all-users">유저 검색</div>
             </div>
 
-            <div id="tab-crew-friends-content" class="friends-list">
-              <!-- Dynamically generated friend cards -->
+            <div id="tab-crew-friends-content" class="friends-list" style="display: flex; flex-direction: column; gap: 8px;">
+              <div class="search-container" style="width: 100%;">
+                <input type="text" class="search-input" id="input-search-friend" placeholder="친구 검색...">
+              </div>
+              <div id="crew-friends-list-container" class="friends-list" style="width: 100%; flex: 1; overflow-y: auto;">
+                <!-- Dynamically generated friend cards -->
+              </div>
             </div>
 
             <div id="tab-all-users-content" class="friends-list" style="display:none;">
@@ -335,9 +339,9 @@
               <div class="form-group">
                 <span class="form-label">인증할 가상 운동 정보</span>
                 <select class="select-input" id="select-upload-workout-type">
-                  <option value="RUNNING">러닝 (30분, 중강도)</option>
-                  <option value="CYCLING">사이클 (45분, 고강도)</option>
-                  <option value="WALKING">걷기 (60분, 저강도)</option>
+                  <option value="COURSE">코스 운동 (30분, 중강도)</option>
+                  <option value="INDOOR">실내운동 (45분, 고강도)</option>
+                  <option value="OUTDOOR">실외운동 (60분, 저강도)</option>
                 </select>
               </div>
 
@@ -569,7 +573,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
   <!-- Application Logic -->
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=5"></script>
 </body>
 
 </html>

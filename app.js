@@ -17,11 +17,11 @@ const DEFAULT_STATE = {
     { id: "stone-init-2", name: "아침 야산 런", shape: "mountain-loop", met: 8.3, size: 1.25, date: "2026-06-24" }
   ],
   history: [
-    { id: "hist-1", type: "WALKING", intensity: "LOW", duration: 25, met: 2.5, points: 31, date: "2026-06-20 18:24", photo: null },
-    { id: "hist-2", type: "RUNNING", intensity: "HIGH", duration: 40, met: 11.0, points: 220, date: "2026-06-21 07:15", photo: "mock-photo.jpg" },
-    { id: "hist-3", type: "CYCLING", intensity: "MODERATE", duration: 50, met: 7.5, points: 150, date: "2026-06-22 19:30", photo: null },
-    { id: "hist-4", type: "RUNNING", intensity: "MODERATE", duration: 30, met: 8.0, points: 120, date: "2026-06-23 08:00", photo: null },
-    { id: "hist-5", type: "WALKING", intensity: "LOW", duration: 60, met: 3.0, points: 90, date: "2026-06-24 17:45", photo: null }
+    { id: "hist-1", type: "OUTDOOR", intensity: "LOW", duration: 25, met: 3.0, points: 31, date: "2026-06-20 18:24", photo: null },
+    { id: "hist-2", type: "COURSE", intensity: "HIGH", duration: 40, met: 10.0, points: 220, date: "2026-06-21 07:15", photo: "mock-photo.jpg" },
+    { id: "hist-3", type: "INDOOR", intensity: "MODERATE", duration: 50, met: 6.0, points: 150, date: "2026-06-22 19:30", photo: null },
+    { id: "hist-4", type: "COURSE", intensity: "MODERATE", duration: 30, met: 7.5, points: 120, date: "2026-06-23 08:00", photo: null },
+    { id: "hist-5", type: "OUTDOOR", intensity: "LOW", duration: 60, met: 3.0, points: 90, date: "2026-06-24 17:45", photo: null }
   ],
   friends: [
     { name: "빈츠 (Beenzino)", status: "온라인 - 러닝 코스 개척 중", step: 5, color: "#60a5fa" },
@@ -101,7 +101,7 @@ const DEFAULT_STATE = {
     { id: "island-4", name: "최종 보물 섬", status: "LOCKED", x: 340, y: 100 }
   ],
   workoutSettings: {
-    type: "RUNNING",
+    type: "COURSE",
     intensity: "MODERATE",
     duration: 30,
     gpsEnabled: true,
@@ -144,9 +144,15 @@ function showToast(message, type = "info") {
 
 // MET Values mapping
 const MET_VALUES = {
-  RUNNING: { LOW: 6.0, MODERATE: 8.3, HIGH: 11.0 },
-  CYCLING: { LOW: 4.0, MODERATE: 7.0, HIGH: 10.0 },
-  WALKING: { LOW: 2.5, MODERATE: 3.5, HIGH: 5.0 }
+  COURSE: { LOW: 5.0, MODERATE: 7.5, HIGH: 10.0 },
+  INDOOR: { LOW: 3.5, MODERATE: 6.0, HIGH: 8.5 },
+  OUTDOOR: { LOW: 3.0, MODERATE: 5.0, HIGH: 8.0 }
+};
+
+const WORKOUT_TYPES = {
+  COURSE: { label: "코스 운동", icon: "route" },
+  INDOOR: { label: "실내운동", icon: "dumbbell" },
+  OUTDOOR: { label: "실외운동", icon: "mountain-sun" }
 };
 
 // ==========================================
@@ -168,7 +174,7 @@ function initThree() {
   scene.fog = new THREE.FogExp2(0x3b82f6, 0.015);
 
   // Camera
-  camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+  camera = new THREE.PerspectiveCamera(30, width / height, 0.1, 100);
   camera.position.set(0, 14, 21);
 
   // Renderer
@@ -214,6 +220,7 @@ function initThree() {
   // Create Island and Water
   createWater();
   createIsland();
+  createSeaFoam();
   createBuildings();
   createPaths();
   createCampfire();
@@ -250,6 +257,44 @@ function createWater() {
   scene.add(waterMesh);
 }
 
+// Expanding Wave Foam Rings around the Island Cliff Base
+let waveFoams = [];
+function createSeaFoam() {
+  const foamGroup = new THREE.Group();
+
+  // Flat circular disc geometry laid flat
+  const geo = new THREE.CircleGeometry(0.15, 6);
+  geo.rotateX(-Math.PI / 2);
+
+  // Create 32 scattered foam spray particles
+  for (let i = 0; i < 32; i++) {
+    const mat = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.6,
+      depthWrite: false
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+
+    // Random initial distance (radius) and angle around island
+    const distance = 5.2 + Math.random() * 1.6;
+    const angle = Math.random() * Math.PI * 2;
+
+    mesh.position.set(Math.cos(angle) * distance, -1.18, Math.sin(angle) * distance);
+    foamGroup.add(mesh);
+
+    waveFoams.push({
+      mesh: mesh,
+      angle: angle,
+      distance: distance,
+      speed: 0.25 + Math.random() * 0.35,
+      scale: 0.7 + Math.random() * 0.6,
+      phase: Math.random() * Math.PI * 2
+    });
+  }
+  scene.add(foamGroup);
+}
+
 // 2.2 Stylized Low-Poly Island Ground
 // 2.2 Stylized Low-Poly Island Ground & Cliff Base (Upgraded matching reference)
 function createIsland() {
@@ -274,7 +319,7 @@ function createIsland() {
     roughness: 0.9,
     flatShading: true
   });
-  const coreGeo = new THREE.CylinderGeometry(5.0, 3.8, 2.5, 12, 2);
+  const coreGeo = new THREE.CylinderGeometry(5.0, 5.8, 2.5, 12, 2);
   const coreMesh = new THREE.Mesh(coreGeo, baseMat);
   coreMesh.position.y = -1.25;
   coreMesh.receiveShadow = true;
@@ -717,6 +762,7 @@ function createBuoy() {
   buoyGroup.add(ring);
 
   buoyGroup.position.set(0, -1.05, 3.8); // Floats near bottom center
+  buoyGroup.visible = false; // Hide 3D buoy completely
   islandGroup.add(buoyGroup);
 
   buoyMesh = buoyGroup;
@@ -757,8 +803,7 @@ function updateLabels() {
     // Get position offset slightly upwards
     tempV.setFromMatrixPosition(obj.matrixWorld);
 
-    if (key === "center") tempV.y += 0.8;
-    else if (key === "buoy") tempV.y += 0.5;
+    if (key === "center") tempV.y += 1.5;
     else tempV.y += 1.2;
 
     tempV.project(camera);
@@ -795,11 +840,45 @@ function animate() {
     waterMesh.geometry.computeVertexNormals();
   }
 
-  // Buoy bobbing
-  if (buoyMesh) {
-    buoyMesh.position.y = -1.05 + Math.sin(time * 2.0) * 0.06;
-    buoyMesh.rotation.z = Math.sin(time * 1.8) * 0.1;
-    buoyMesh.rotation.x = Math.cos(time * 1.5) * 0.08;
+  // Animate expanding wave foams around the island base
+  if (waveFoams.length > 0) {
+    waveFoams.forEach(foam => {
+      // Move outward
+      foam.distance += foam.speed * delta;
+
+      // Bob up and down slightly with water waves
+      const bob = Math.sin(time * 2.0 + foam.phase) * 0.02;
+
+      // Calculate opacity and scale based on distance progress
+      const progress = Math.max(0, Math.min(1.0, (foam.distance - 5.2) / 1.6)); // 0 to 1
+
+      if (progress >= 1.0) {
+        // Reset to shore
+        foam.distance = 5.2;
+        foam.angle = Math.random() * Math.PI * 2;
+        foam.speed = 0.25 + Math.random() * 0.35;
+        foam.scale = 0.7 + Math.random() * 0.6;
+      }
+
+      const currentScale = foam.scale * (1.0 - progress * 0.7);
+      foam.mesh.scale.set(currentScale, currentScale, currentScale);
+
+      // Fade out towards the end
+      let opacity = 0.6;
+      if (progress < 0.2) {
+        opacity = (progress / 0.2) * 0.6;
+      } else {
+        opacity = (1.0 - progress) * 0.6;
+      }
+      foam.mesh.material.opacity = Math.max(0, opacity);
+
+      // Update position
+      foam.mesh.position.set(
+        Math.cos(foam.angle) * foam.distance,
+        -1.18 + bob,
+        Math.sin(foam.angle) * foam.distance
+      );
+    });
   }
 
   // Campfire Flame pulsing scale & rotate
@@ -953,12 +1032,23 @@ function closeModal(overlay) {
 
 function setupModalTriggers() {
   // Floating bubble clicks
-  document.getElementById("lbl-north").addEventListener("click", () => triggerHutModal("north"));
-  document.getElementById("lbl-east").addEventListener("click", () => triggerHutModal("east"));
-  document.getElementById("lbl-west").addEventListener("click", () => triggerHutModal("west"));
-  document.getElementById("lbl-south").addEventListener("click", () => triggerHutModal("south"));
-  document.getElementById("lbl-center").addEventListener("click", () => triggerHutModal("center"));
-  document.getElementById("lbl-buoy").addEventListener("click", () => triggerHutModal("buoy"));
+  const lblNorth = document.getElementById("lbl-north");
+  if (lblNorth) lblNorth.addEventListener("click", () => triggerHutModal("north"));
+
+  const lblEast = document.getElementById("lbl-east");
+  if (lblEast) lblEast.addEventListener("click", () => triggerHutModal("east"));
+
+  const lblWest = document.getElementById("lbl-west");
+  if (lblWest) lblWest.addEventListener("click", () => triggerHutModal("west"));
+
+  const lblSouth = document.getElementById("lbl-south");
+  if (lblSouth) lblSouth.addEventListener("click", () => triggerHutModal("south"));
+
+  const lblCenter = document.getElementById("lbl-center");
+  if (lblCenter) lblCenter.addEventListener("click", () => triggerHutModal("center"));
+
+  const lblBuoy = document.getElementById("lbl-buoy");
+  if (lblBuoy) lblBuoy.addEventListener("click", () => triggerHutModal("buoy"));
 
   // Wood Start Button
   // Workout start/stop button logic
@@ -977,7 +1067,7 @@ function setupModalTriggers() {
       // Get settings
       const typeCard = document.querySelector("#workout-type-group .radio-card.active");
       const intensityCard = document.querySelector("#workout-intensity-group .radio-card.active");
-      const type = typeCard ? typeCard.dataset.value : "RUNNING";
+      const type = typeCard ? typeCard.dataset.value : "COURSE";
       const intensity = intensityCard ? intensityCard.dataset.value : "MODERATE";
       const met = (MET_VALUES[type] && MET_VALUES[type][intensity]) || 0;
 
@@ -993,7 +1083,7 @@ function setupModalTriggers() {
         const mins = String(Math.floor(elapsedSec / 60)).padStart(2, "0");
         const secs = String(elapsedSec % 60).padStart(2, "0");
         document.getElementById("workout-timer-val").innerText = `${mins}:${secs}`;
-        
+
         // Calculate dynamic energy: MET * (elapsedSec / 60) * 10
         const currentEnergy = Math.round(met * (elapsedSec / 60) * 10);
         document.getElementById("workout-energy-val").innerText = `${currentEnergy} FP`;
@@ -1004,16 +1094,16 @@ function setupModalTriggers() {
       clearInterval(workoutTimerInterval);
       const endTime = Date.now();
       const durationSec = Math.round((endTime - workoutStartTime) / 1000);
-      
+
       const typeCard = document.querySelector("#workout-type-group .radio-card.active");
       const intensityCard = document.querySelector("#workout-intensity-group .radio-card.active");
-      const type = typeCard ? typeCard.dataset.value : "RUNNING";
+      const type = typeCard ? typeCard.dataset.value : "COURSE";
       const intensity = intensityCard ? intensityCard.dataset.value : "MODERATE";
       const met = (MET_VALUES[type] && MET_VALUES[type][intensity]) || 0;
-      
+
       // Calculate workout power
       const workoutPower = Math.round(met * (durationSec / 60) * 10);
-      
+
       // Update history in state
       const dateStr = new Date().toISOString().replace("T", " ").substring(0, 16);
       const newLog = {
@@ -1026,30 +1116,31 @@ function setupModalTriggers() {
         date: dateStr,
         photo: null
       };
-      
+
       state.history.unshift(newLog);
       state.fitnessPoints += workoutPower;
       saveState();
-      
+
       // Update UI
       renderHistory();
       renderWarehouse();
-      
+
       // Reset active overlay
       const overlay = document.getElementById("workout-active-overlay");
       overlay.classList.remove("active");
-      
+
       // Show Workout Result Modal
-      document.getElementById("workout-result-type").innerText = `${type === "RUNNING" ? "러닝" : type === "CYCLING" ? "사이클" : "걷기"} (${intensity === "LOW" ? "저강도" : intensity === "MODERATE" ? "중강도" : "고강도"})`;
-      
+      const typeInfo = WORKOUT_TYPES[type] || { label: "코스 운동" };
+      document.getElementById("workout-result-type").innerText = `${typeInfo.label} (${intensity === "LOW" ? "저강도" : intensity === "MODERATE" ? "중강도" : "고강도"})`;
+
       const resultMins = String(Math.floor(durationSec / 60)).padStart(2, "0");
       const resultSecs = String(durationSec % 60).padStart(2, "0");
       document.getElementById("workout-result-duration").innerText = `${resultMins}:${resultSecs}`;
       document.getElementById("workout-result-met").innerText = met;
       document.getElementById("workout-result-power").innerText = `+${workoutPower} FP`;
-      
-      openModal(document.getElementById("modal-workout-result"));
-      
+
+      openModal("modal-workout-result");
+
       // Reset button UI
       btn.textContent = "운동 시작";
       btn.setAttribute("data-state", "stopped");
@@ -1109,7 +1200,7 @@ function setupModalTriggers() {
         card.classList.add("active");
         const val = card.getAttribute("data-value");
         state.workoutSettings[stateField] = val;
-        
+
         // Sync with the other group if provided
         if (otherGroupId) {
           const otherContainer = document.getElementById(otherGroupId);
@@ -1245,9 +1336,14 @@ function setupModalTriggers() {
 // 4. RENDERING TABS & DATA CONTENT
 // ==========================================
 function renderFriends() {
-  const container = document.getElementById("tab-crew-friends-content");
+  const container = document.getElementById("crew-friends-list-container");
+  if (!container) return;
   container.innerHTML = "";
-  state.friends.forEach(f => {
+
+  const query = (document.getElementById("input-search-friend")?.value || "").trim().toLowerCase();
+  const filteredFriends = state.friends.filter(f => f.name.toLowerCase().includes(query));
+
+  filteredFriends.forEach(f => {
     const card = document.createElement("div");
     card.className = "friend-card";
     card.innerHTML = `
@@ -1301,7 +1397,7 @@ function showOwnProfile() {
 
   container.innerHTML = `
     <div style="display:flex; align-items:center; gap:16px; width:100%; border-bottom:1px solid var(--glass-border); padding-bottom:14px;">
-      <div class="avatar-circle" style="background:#ec4899; width:56px; height:56px; font-size:22px; flex-shrink:0;">홍길</div>
+      <div class="avatar-circle" style="background:#ec4899; width:56px; height:56px; font-size:22px; flex-shrink:0;">RB</div>
       <div style="flex:1;">
         <h2 style="font-weight:900; font-size:18px;">로빈슨 (나)</h2>
         <p style="color:var(--color-text-muted); font-size:11px; margin-top:2px;">오늘도 열심히 건강하게 운동하는 중! 🏃‍♂️</p>
@@ -1332,7 +1428,7 @@ function renderOwnProfilePage() {
 
   container.innerHTML = `
     <div style="display:flex; align-items:center; gap:16px; width:100%; border-bottom:1px solid var(--glass-border); padding-bottom:14px;">
-      <div class="avatar-circle" style="background:#ec4899; width:56px; height:56px; font-size:22px; flex-shrink:0; border: 2.5px solid #000; box-shadow: 0 4px 0 #000; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:900;">홍길</div>
+      <div class="avatar-circle" style="background:#ec4899; width:56px; height:56px; font-size:22px; flex-shrink:0; border: 2.5px solid #000; box-shadow: 0 4px 0 #000; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:900;">RB</div>
       <div style="flex:1;">
         <h2 style="font-weight:900; font-size:18px; color: #fff;">로빈슨 (나)</h2>
         <p style="color:var(--color-text-muted); font-size:12px; margin-top:2px;">오늘도 열심히 건강하게 운동하는 중! 🏃‍♂️</p>
@@ -1420,15 +1516,15 @@ function generateContributionGrassHTML() {
 }
 
 const WORKOUT_FEED_DATA = [
-  { type: "RUNNING", duration: 30, points: 120, date: "06-25", tag: "5.2km", icon: "person-running", imageUrl: "https://images.unsplash.com/photo-1476480862126-209bfaa8edc8", title: "한강 모닝 러닝", intensity: "MODERATE", met: 8.3 },
-  { type: "CYCLING", duration: 45, points: 180, date: "06-23", tag: "15.4km", icon: "bicycle", imageUrl: "https://images.unsplash.com/photo-1485965120184-e220f721d03e", title: "하남 자전거길 라이딩", intensity: "MODERATE", met: 7.0 },
-  { type: "WALKING", duration: 60, points: 50, date: "06-22", tag: "6,200보", icon: "person-walking", imageUrl: "https://images.unsplash.com/photo-1551632811-5617ba2adda4", title: "남산 산책", intensity: "LOW", met: 2.5 },
-  { type: "RUNNING", duration: 40, points: 220, date: "06-20", tag: "8.1km", icon: "person-running", imageUrl: "https://images.unsplash.com/photo-1502904582529-0a15f0cee5c2", title: "퇴근 리프레시 런", intensity: "HIGH", met: 11.0 },
-  { type: "CYCLING", duration: 30, points: 100, date: "06-18", tag: "10.2km", icon: "bicycle", imageUrl: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48", title: "동네 스피닝", intensity: "LOW", met: 4.0 },
-  { type: "WALKING", duration: 40, points: 35, date: "06-17", tag: "4,500보", icon: "person-walking", imageUrl: "https://images.unsplash.com/photo-1506126613408-eca07ce68773", title: "공원 점심 산책", intensity: "LOW", met: 2.5 },
-  { type: "RUNNING", duration: 25, points: 95, date: "06-15", tag: "4.0km", icon: "person-running", imageUrl: "https://images.unsplash.com/photo-1486218119243-13883505764c", title: "저녁 가벼운 조깅", intensity: "LOW", met: 6.0 },
-  { type: "CYCLING", duration: 50, points: 210, date: "06-13", tag: "18.5km", icon: "bicycle", imageUrl: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd", title: "주말 동호회 벙개", intensity: "HIGH", met: 10.0 },
-  { type: "WALKING", duration: 75, points: 65, date: "06-12", tag: "8,500보", icon: "person-walking", imageUrl: "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d", title: "주말 나들이 코스", intensity: "LOW", met: 2.5 }
+  { type: "COURSE", duration: 30, points: 120, date: "06-25", tag: "5.2km", icon: "route", imageUrl: "https://images.unsplash.com/photo-1476480862126-209bfaa8edc8", title: "한강 모닝 러닝", intensity: "MODERATE", met: 8.3 },
+  { type: "INDOOR", duration: 45, points: 180, date: "06-23", tag: "15.4km", icon: "dumbbell", imageUrl: "https://images.unsplash.com/photo-1485965120184-e220f721d03e", title: "하남 자전거길 라이딩", intensity: "MODERATE", met: 7.0 },
+  { type: "OUTDOOR", duration: 60, points: 50, date: "06-22", tag: "6,200보", icon: "mountain-sun", imageUrl: "https://images.unsplash.com/photo-1551632811-5617ba2adda4", title: "남산 산책", intensity: "LOW", met: 2.5 },
+  { type: "COURSE", duration: 40, points: 220, date: "06-20", tag: "8.1km", icon: "route", imageUrl: "https://images.unsplash.com/photo-1502904582529-0a15f0cee5c2", title: "퇴근 리프레시 런", intensity: "HIGH", met: 11.0 },
+  { type: "INDOOR", duration: 30, points: 100, date: "06-18", tag: "10.2km", icon: "dumbbell", imageUrl: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48", title: "동네 스피닝", intensity: "LOW", met: 4.0 },
+  { type: "OUTDOOR", duration: 40, points: 35, date: "06-17", tag: "4,500보", icon: "mountain-sun", imageUrl: "https://images.unsplash.com/photo-1506126613408-eca07ce68773", title: "공원 점심 산책", intensity: "LOW", met: 2.5 },
+  { type: "COURSE", duration: 25, points: 95, date: "06-15", tag: "4.0km", icon: "route", imageUrl: "https://images.unsplash.com/photo-1486218119243-13883505764c", title: "저녁 가벼운 조깅", intensity: "LOW", met: 6.0 },
+  { type: "INDOOR", duration: 50, points: 210, date: "06-13", tag: "18.5km", icon: "dumbbell", imageUrl: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd", title: "주말 동호회 벙개", intensity: "HIGH", met: 10.0 },
+  { type: "OUTDOOR", duration: 75, points: 65, date: "06-12", tag: "8,500보", icon: "mountain-sun", imageUrl: "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d", title: "주말 나들이 코스", intensity: "LOW", met: 2.5 }
 ];
 
 function generateInstaFeedHTML(name) {
@@ -1463,7 +1559,7 @@ function showWorkoutDetail(index) {
   const container = document.getElementById("modal-workout-detail-content");
 
   const intensityLabel = w.intensity === "LOW" ? "저강도" : w.intensity === "MODERATE" ? "중강도" : "고강도";
-  const typeLabel = w.type === "RUNNING" ? "러닝" : w.type === "CYCLING" ? "사이클" : "걷기";
+  const typeLabel = WORKOUT_TYPES[w.type] ? WORKOUT_TYPES[w.type].label : w.type;
 
   container.innerHTML = `
     <div class="workout-detail-card" style="display:flex; flex-direction:column; gap:16px;">
@@ -1499,6 +1595,50 @@ function showWorkoutDetail(index) {
   openModal("modal-workout-detail");
 }
 
+function showHistoryDetail(h) {
+  const container = document.getElementById("modal-workout-detail-content");
+  if (!container) return;
+
+  const typeLabel = WORKOUT_TYPES[h.type] ? WORKOUT_TYPES[h.type].label : h.type;
+  const intensityLabel = h.intensity === "LOW" ? "저강도" : h.intensity === "MODERATE" ? "중강도" : "고강도";
+  const icon = WORKOUT_TYPES[h.type] ? WORKOUT_TYPES[h.type].icon : "route";
+
+  container.innerHTML = `
+    <div class="workout-detail-card" style="display:flex; flex-direction:column; gap:16px;">
+      <div style="display:flex; align-items:center; justify-content:center; height:120px; background:linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius:16px; border:1px solid var(--glass-border); font-size:48px; color:var(--color-primary);">
+        <i class="fa-solid fa-${icon}"></i>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="font-weight:900; font-size:18px; color:#fff;">${typeLabel} 운동 기록 상세</h3>
+        <span style="font-size:12px; color:var(--color-text-muted); font-weight:700;">${h.date}</span>
+      </div>
+      <div class="detail-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="detail-item" style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; display:flex; flex-direction:column; gap:4px; border: 1px solid var(--glass-border);">
+          <span style="font-size:11px; color:var(--color-text-muted);">운동 종목</span>
+          <span style="font-weight:700; color:#fff;">${typeLabel}</span>
+        </div>
+        <div class="detail-item" style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; display:flex; flex-direction:column; gap:4px; border: 1px solid var(--glass-border);">
+          <span style="font-size:11px; color:var(--color-text-muted);">운동 강도</span>
+          <span style="font-weight:700; color:#fff;">${intensityLabel} (MET: ${h.met})</span>
+        </div>
+        <div class="detail-item" style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; display:flex; flex-direction:column; gap:4px; border: 1px solid var(--glass-border);">
+          <span style="font-size:11px; color:var(--color-text-muted);">지속 시간</span>
+          <span style="font-weight:700; color:#fff;">${h.duration}분</span>
+        </div>
+        <div class="detail-item" style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; display:flex; flex-direction:column; gap:4px; border: 1px solid var(--glass-border);">
+          <span style="font-size:11px; color:var(--color-text-muted);">획득 운동력</span>
+          <span style="font-weight:700; color:var(--color-success);">+${h.points} FP</span>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); padding:12px; border-radius:12px; display:flex; align-items:center; gap:10px; margin-top:8px;">
+        <i class="fa-solid fa-circle-info" style="color:var(--color-primary); font-size:20px;"></i>
+        <span style="font-size:12px; font-weight:700; color:var(--color-text-muted);">${h.photo ? '📸 사진 인증이 완료된 트랙 코스 기록입니다.' : '✍️ 일반 직접 기록입니다.'}</span>
+      </div>
+    </div>
+  `;
+  openModal("modal-workout-detail");
+}
+
 function renderHistory() {
   const container = document.getElementById("tab-history-view-content");
   container.innerHTML = "";
@@ -1509,9 +1649,10 @@ function renderHistory() {
   state.history.forEach(h => {
     const card = document.createElement("div");
     card.className = "history-card";
-    const typeLabel = h.type === "RUNNING" ? "러닝" : h.type === "CYCLING" ? "사이클" : "걷기";
+    card.style.cursor = "pointer";
+    const typeLabel = WORKOUT_TYPES[h.type] ? WORKOUT_TYPES[h.type].label : h.type;
     const intensityLabel = h.intensity === "LOW" ? "저강도" : h.intensity === "MODERATE" ? "중강도" : "고강도";
-    const icon = h.type === "RUNNING" ? "person-running" : h.type === "CYCLING" ? "bicycle" : "person-walking";
+    const icon = WORKOUT_TYPES[h.type] ? WORKOUT_TYPES[h.type].icon : "route";
     card.innerHTML = `
       <div class="history-left">
         <div class="history-type">
@@ -1525,6 +1666,9 @@ function renderHistory() {
         <div class="history-met">${h.met} MET</div>
       </div>
     `;
+    card.addEventListener("click", () => {
+      showHistoryDetail(h);
+    });
     container.appendChild(card);
   });
 }
@@ -1682,9 +1826,9 @@ function updateHQBuildingVisual() {
 function renderCrewSelectors() {
   const container = document.getElementById("crew-selector-container");
   if (!container) return;
-  
+
   container.innerHTML = "";
-  
+
   state.crews.forEach(crew => {
     const card = document.createElement("div");
     card.className = `crew-select-card ${state.selectedCrewId === crew.id ? 'active' : ''}`;
@@ -1706,7 +1850,7 @@ function selectCrew(crewId) {
     state.crewMembers = crew.members;
   }
   saveState();
-  
+
   renderCrewSelectors();
   renderRoadmap();
   renderCrewGrid();
@@ -1747,9 +1891,10 @@ function renderCrewGrid() {
         showFriendProfile(friend);
       });
     } else {
-      // Empty slot styled with a bold black question mark
+      // Empty slot styled with a bold black plus sign
+      card.className = "journey-card empty-slot";
       card.innerHTML = `
-        <div class="journey-card-empty">?</div>
+        <div class="journey-card-empty">+</div>
       `;
       card.addEventListener("click", () => inviteCrewMemberSlot());
     }
@@ -1903,6 +2048,22 @@ function setupNavigation() {
     document.getElementById("page-crew-roadmap").classList.remove("active");
     renderCrewGrid();
   });
+
+  // Buoy Category Button Click
+  const btnBuoy = document.getElementById("btn-buoy-sport");
+  if (btnBuoy) {
+    btnBuoy.addEventListener("click", () => {
+      openModal("modal-buoy-workout");
+    });
+  }
+
+  // Friends Search Input
+  const friendSearchInput = document.getElementById("input-search-friend");
+  if (friendSearchInput) {
+    friendSearchInput.addEventListener("input", () => {
+      renderFriends();
+    });
+  }
 }
 
 function switchTab(tab) {
@@ -2388,9 +2549,9 @@ window.addEventListener("DOMContentLoaded", () => {
     let intensity = "MODERATE";
     let met = MET_VALUES[selectedWorkoutVal][intensity];
 
-    if (selectedWorkoutVal === "CYCLING") {
+    if (selectedWorkoutVal === "INDOOR") {
       duration = 45; intensity = "HIGH"; met = MET_VALUES[selectedWorkoutVal][intensity];
-    } else if (selectedWorkoutVal === "WALKING") {
+    } else if (selectedWorkoutVal === "OUTDOOR") {
       duration = 60; intensity = "LOW"; met = MET_VALUES[selectedWorkoutVal][intensity];
     }
 
