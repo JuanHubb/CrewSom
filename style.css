@@ -50,10 +50,15 @@ body {
 #phone-container {
   position: relative;
   width: 430px;
-  height: 915px;
+  height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 20px);
+  max-height: 960px;
   background: #000;
   border-radius: 48px;
-  padding: 12px;
+  padding-top: env(safe-area-inset-top); /* top address bar */
+  padding-bottom: env(safe-area-inset-bottom); /* bottom navigation bar */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding: 12px; /* fallback */
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8),
               0 0 0 4px #27272a,
               0 0 40px rgba(245, 158, 11, 0.1);
