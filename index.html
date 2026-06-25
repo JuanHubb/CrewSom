@@ -30,9 +30,9 @@
       <!-- HUD Overlay -->
       <div id="hud-overlay">
         <div class="hud-left">
-          <div class="hud-stat heart" title="남은 하트">
-            <i class="fa-solid fa-heart"></i>
-            <span class="hud-stat-val" id="hud-hearts">10</span>
+          <div class="hud-stat streak" title="연속 운동 일수">
+            <i class="fa-solid fa-fire"></i>
+            <span class="hud-stat-val" id="hud-streak">0일</span>
           </div>
           <div class="hud-stat steps" title="주간 운동 성취도 (노드 위치)">
             <i class="fa-solid fa-person-running"></i>
@@ -366,7 +366,7 @@
             </div>
 
             <div id="tab-warehouse-view-content" style="display:flex; flex-direction:column; gap:16px;">
-              <div class="inventory-grid">
+              <div class="inventory-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px;">
                 <div class="inv-card">
                   <i class="fa-solid fa-star inv-icon"></i>
                   <span class="inv-count" id="inv-points-val">0</span>
@@ -377,6 +377,21 @@
                   <span class="inv-count" id="inv-planks-val">0</span>
                   <span class="inv-name">나무판자 개수</span>
                 </div>
+                <div class="inv-card">
+                  <i class="fa-solid fa-mountain inv-icon" style="color:#94a3b8"></i>
+                  <span class="inv-count" id="inv-stones-val">0</span>
+                  <span class="inv-name">단단한 돌 개수</span>
+                </div>
+                <div class="inv-card">
+                  <i class="fa-solid fa-circle-nodes inv-icon" style="color:#d97706"></i>
+                  <span class="inv-count" id="inv-ropes-val">0</span>
+                  <span class="inv-name">튼튼한 밧줄 개수</span>
+                </div>
+                <div class="inv-card" style="grid-column: span 2;">
+                  <i class="fa-solid fa-gem inv-icon" style="color:#cbd5e1"></i>
+                  <span class="inv-count" id="inv-iron-val">0</span>
+                  <span class="inv-name">철광석 개수</span>
+                </div>
               </div>
 
               <span class="form-label">보유한 3D 트랙 돌 목록 (GPS 연동)</span>
@@ -385,7 +400,7 @@
               </div>
             </div>
 
-            <div id="tab-shop-view-content" style="display:none; flex-direction:column; gap:12px;">
+            <div id="tab-shop-view-content" style="display:none; flex-direction:column; gap:12px; max-height: 280px; overflow-y: auto; padding-right: 4px;">
               <div class="shop-item">
                 <div class="shop-left">
                   <div style="font-size:32px; color:var(--wood-light)"><i class="fa-solid fa-cubes"></i></div>
@@ -395,6 +410,36 @@
                   </div>
                 </div>
                 <button class="btn-buy" id="btn-buy-plank">구매</button>
+              </div>
+              <div class="shop-item">
+                <div class="shop-left">
+                  <div style="font-size:32px; color:#94a3b8"><i class="fa-solid fa-mountain"></i></div>
+                  <div class="shop-details">
+                    <span class="shop-item-title">단단한 돌 1개</span>
+                    <span class="shop-item-cost"><i class="fa-solid fa-star"></i> 150 FP</span>
+                  </div>
+                </div>
+                <button class="btn-buy" id="btn-buy-stone">구매</button>
+              </div>
+              <div class="shop-item">
+                <div class="shop-left">
+                  <div style="font-size:32px; color:#d97706"><i class="fa-solid fa-circle-nodes"></i></div>
+                  <div class="shop-details">
+                    <span class="shop-item-title">튼튼한 밧줄 1개</span>
+                    <span class="shop-item-cost"><i class="fa-solid fa-star"></i> 80 FP</span>
+                  </div>
+                </div>
+                <button class="btn-buy" id="btn-buy-rope">구매</button>
+              </div>
+              <div class="shop-item">
+                <div class="shop-left">
+                  <div style="font-size:32px; color:#cbd5e1"><i class="fa-solid fa-gem"></i></div>
+                  <div class="shop-details">
+                    <span class="shop-item-title">철광석 1개</span>
+                    <span class="shop-item-cost"><i class="fa-solid fa-star"></i> 250 FP</span>
+                  </div>
+                </div>
+                <button class="btn-buy" id="btn-buy-iron">구매</button>
               </div>
             </div>
           </div>
@@ -574,7 +619,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
   <!-- Application Logic -->
-  <script src="app.js?v=5"></script>
+  <script src="app.js"></script>
 </body>
 
 </html>

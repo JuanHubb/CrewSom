@@ -134,9 +134,21 @@ body {
   font-size: 16px;
 }
 
-.hud-stat.heart i {
-  color: var(--color-danger);
-  animation: beat 1.2s infinite alternate;
+.hud-stat.streak i {
+  color: #f97316; /* Bright Fire Orange */
+  animation: flicker 1.4s infinite alternate;
+}
+
+@keyframes flicker {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 1;
+    filter: drop-shadow(0 0 4px rgba(249, 115, 22, 0.8));
+  }
 }
 
 .hud-stat.steps i {

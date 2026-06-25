@@ -129,7 +129,7 @@ function initThree() {
 
   // Camera
   camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-  camera.position.set(0, 2, 45);
+  camera.position.set(0, 40, 45);
 
   // Renderer
   renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas'), antialias: true });
@@ -262,7 +262,7 @@ function buildWorldMapScene() {
       islandMesh.userData.glowRing = glow; // save for pulsing
     }
 
-    islandMesh.scale.set(0.55, 0.55, 0.55);
+    islandMesh.scale.set(0.6, 0.6, 0.6);
     mapIslandsGroup.add(islandMesh);
   });
 
@@ -373,7 +373,7 @@ function buildBridgeScene() {
   clearGroup(gameBoardGroup);
 
   // Set game camera defaults
-  camera.position.set(0, 10, 14);
+  camera.position.set(-30, 30, 14);
   controls.target.set(0, 0, 0);
   controls.update();
 
@@ -865,7 +865,7 @@ function clearPlacements() {
 
 function resetCamera() {
   if (activeView === 'game') {
-    camera.position.set(0, 10, 14);
+    camera.position.set(0, 15, 21);
     controls.target.set(0, 0, 0);
   } else {
     camera.position.set(0, 14, 45);

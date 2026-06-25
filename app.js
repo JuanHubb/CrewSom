@@ -8,10 +8,14 @@
 // ==========================================
 const DEFAULT_STATE = {
   nickname: "로빈슨",
+  streakDays: 5,
   hearts: 10,
   steps: 75, // Matches the screenshot
   fitnessPoints: 350,
   woodenPlanks: 2,
+  heavyStones: 1,
+  strongRopes: 3,
+  ironBars: 0,
   trackStones: [
     { id: "stone-init-1", name: "동네 한바퀴", shape: "city-park", met: 3.5, size: 0.52, date: "2026-06-23" },
     { id: "stone-init-2", name: "아침 야산 런", shape: "mountain-loop", met: 8.3, size: 1.25, date: "2026-06-24" }
@@ -116,16 +120,32 @@ if (!state || !state.history || state.history.length < 5 || !state.crews) {
   localStorage.setItem("crewsom_state", JSON.stringify(state));
 }
 
+// Safe migrations for streak & resources
+if (state.streakDays === undefined) state.streakDays = 5;
+if (state.heavyStones === undefined) state.heavyStones = 1;
+if (state.strongRopes === undefined) state.strongRopes = 3;
+if (state.ironBars === undefined) state.ironBars = 0;
+
 function saveState() {
   localStorage.setItem("crewsom_state", JSON.stringify(state));
   updateHUD();
 }
 
 function updateHUD() {
-  document.getElementById("hud-hearts").innerText = state.hearts;
+  const hudStreak = document.getElementById("hud-streak");
+  if (hudStreak) {
+    hudStreak.innerText = `${state.streakDays}일`;
+  }
   document.getElementById("hud-steps").innerText = state.steps;
   document.getElementById("inv-points-val").innerText = state.fitnessPoints;
   document.getElementById("inv-planks-val").innerText = state.woodenPlanks;
+
+  const invStones = document.getElementById("inv-stones-val");
+  const invRopes = document.getElementById("inv-ropes-val");
+  const invIron = document.getElementById("inv-iron-val");
+  if (invStones) invStones.innerText = state.heavyStones;
+  if (invRopes) invRopes.innerText = state.strongRopes;
+  if (invIron) invIron.innerText = state.ironBars;
 }
 
 // Show Toast Alerts
@@ -175,7 +195,7 @@ function initThree() {
 
   // Camera
   camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-  camera.position.set(0, 14, 45);
+  camera.position.set(0, 45, 45);
 
   // Renderer
   renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("three-canvas"), antialias: true });
@@ -374,7 +394,7 @@ function createIsland() {
   }
 
   // 5. Shrink overall group slightly (0.88 scale) so the entire island fit in viewport
-  islandGroup.scale.set(0.55, 0.55, 0.55);
+  islandGroup.scale.set(0.9, 0.9, 0.9);
   scene.add(islandGroup);
 
   // Add decorative rocks and palm trees
@@ -1322,6 +1342,45 @@ function setupModalTriggers() {
     }
   });
 
+  // Shop Buy Stone
+  document.getElementById("btn-buy-stone").addEventListener("click", () => {
+    if (state.fitnessPoints >= 150) {
+      state.fitnessPoints -= 150;
+      state.heavyStones = (state.heavyStones || 0) + 1;
+      showToast("단단한 돌을 구매하였습니다!", "success");
+      saveState();
+      renderWarehouse();
+    } else {
+      showToast("운동력이 부족합니다! (필요: 150 FP)", "error");
+    }
+  });
+
+  // Shop Buy Rope
+  document.getElementById("btn-buy-rope").addEventListener("click", () => {
+    if (state.fitnessPoints >= 80) {
+      state.fitnessPoints -= 80;
+      state.strongRopes = (state.strongRopes || 0) + 1;
+      showToast("튼튼한 밧줄을 구매하였습니다!", "success");
+      saveState();
+      renderWarehouse();
+    } else {
+      showToast("운동력이 부족합니다! (필요: 80 FP)", "error");
+    }
+  });
+
+  // Shop Buy Iron Ore
+  document.getElementById("btn-buy-iron").addEventListener("click", () => {
+    if (state.fitnessPoints >= 250) {
+      state.fitnessPoints -= 250;
+      state.ironBars = (state.ironBars || 0) + 1;
+      showToast("철광석을 구매하였습니다!", "success");
+      saveState();
+      renderWarehouse();
+    } else {
+      showToast("운동력이 부족합니다! (필요: 250 FP)", "error");
+    }
+  });
+
   // Reset App
   document.getElementById("btn-reset-app-data").addEventListener("click", () => {
     localStorage.removeItem("crewsom_state");
@@ -1676,6 +1735,13 @@ function renderHistory() {
 function renderWarehouse() {
   document.getElementById("inv-points-val").innerText = state.fitnessPoints;
   document.getElementById("inv-planks-val").innerText = state.woodenPlanks;
+
+  const invStones = document.getElementById("inv-stones-val");
+  const invRopes = document.getElementById("inv-ropes-val");
+  const invIron = document.getElementById("inv-iron-val");
+  if (invStones) invStones.innerText = state.heavyStones;
+  if (invRopes) invRopes.innerText = state.strongRopes;
+  if (invIron) invIron.innerText = state.ironBars;
 
   const container = document.getElementById("warehouse-stones-list");
   container.innerHTML = "";
