@@ -284,12 +284,7 @@
             <button class="modal-close"><i class="fa-solid fa-xmark"></i></button>
           </div>
           <div class="modal-body">
-            <div class="subtabs">
-              <div class="subtab active" data-tab="crew-friends">크루 친구</div>
-              <div class="subtab" data-tab="all-users">유저 검색</div>
-            </div>
-
-            <div id="tab-crew-friends-content" class="friends-list" style="display: flex; flex-direction: column; gap: 8px;">
+            <div id="tab-crew-friends-content" class="friends-list" style="display: flex; flex-direction: column; gap: 8px; height: 100%;">
               <div class="search-container" style="width: 100%;">
                 <input type="text" class="search-input" id="input-search-friend" placeholder="친구 검색...">
               </div>
@@ -297,16 +292,8 @@
                 <!-- Dynamically generated friend cards -->
               </div>
             </div>
-
-            <div id="tab-all-users-content" class="friends-list" style="display:none;">
-              <div class="search-container">
-                <input type="text" class="search-input" id="input-search-user" placeholder="닉네임 입력...">
-                <button class="btn-search" id="btn-search-user">검색</button>
-              </div>
-              <div id="search-results-list" class="friends-list" style="margin-top: 10px;">
-                <!-- Search results -->
-              </div>
-            </div>
+            <!-- Keep hidden for DOM reference inside JS scripts without breaking logic -->
+            <div id="tab-all-users-content" style="display: none !important;"></div>
           </div>
         </div>
       </div>

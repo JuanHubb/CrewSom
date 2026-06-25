@@ -1593,11 +1593,10 @@ function generateInstaFeedHTML(name) {
       <div class="insta-photo" onclick="showWorkoutDetail(${index})">
         <img src="${w.imageUrl}" class="insta-photo-img feed-img" loading="lazy" style="width:100%; height:100%; object-fit:cover; border-radius:12px;" />
         <i class="fa-solid fa-${w.icon}" style="position:absolute; top:8px; right:8px; font-size:12px; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.8);"></i>
-        <span class="insta-photo-tag">${w.tag}</span>
+        <span class="insta-photo-tag">${w.date} • ${w.tag}</span>
         <div class="insta-overlay">
           <span class="insta-overlay-title">${w.title}</span>
           <span class="insta-overlay-stat">${w.duration}분 • +${w.points}FP</span>
-          <span style="font-size:8px; color:rgba(255,255,255,0.5);">${w.date}</span>
         </div>
       </div>
     `;
