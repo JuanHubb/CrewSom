@@ -174,8 +174,8 @@ function initThree() {
   scene.fog = new THREE.FogExp2(0x3b82f6, 0.015);
 
   // Camera
-  camera = new THREE.PerspectiveCamera(30, width / height, 0.1, 100);
-  camera.position.set(0, 14, 21);
+  camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+  camera.position.set(0, 14, 45);
 
   // Renderer
   renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("three-canvas"), antialias: true });
@@ -374,7 +374,7 @@ function createIsland() {
   }
 
   // 5. Shrink overall group slightly (0.88 scale) so the entire island fit in viewport
-  islandGroup.scale.set(0.88, 0.88, 0.88);
+  islandGroup.scale.set(0.55, 0.55, 0.55);
   scene.add(islandGroup);
 
   // Add decorative rocks and palm trees

@@ -129,7 +129,7 @@ function initThree() {
 
   // Camera
   camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-  camera.position.set(0, 14, 21);
+  camera.position.set(0, 2, 45);
 
   // Renderer
   renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas'), antialias: true });
@@ -262,6 +262,7 @@ function buildWorldMapScene() {
       islandMesh.userData.glowRing = glow; // save for pulsing
     }
 
+    islandMesh.scale.set(0.55, 0.55, 0.55);
     mapIslandsGroup.add(islandMesh);
   });
 
@@ -867,7 +868,7 @@ function resetCamera() {
     camera.position.set(0, 10, 14);
     controls.target.set(0, 0, 0);
   } else {
-    camera.position.set(0, 14, 21);
+    camera.position.set(0, 14, 45);
     controls.target.set(0, 0, 0);
   }
 }
@@ -916,7 +917,7 @@ function startSimulation() {
 
   // Run path checker (BFS/Walk) from col 0 to 11
   const path = findCrossingPath();
-  
+
   // Animate character along coordinates
   animateCharacterCrossing(path);
 }
@@ -1038,14 +1039,14 @@ function confirmSuccess() {
   // Update target island status to completed, unlock outer nodes
   if (currentVoyageTarget) {
     currentVoyageTarget.state = VoyageIslandState.completed;
-    
+
     // Unlock next node (cherry island node 3 becomes active/completed)
     const nextIsland = voyageIslands.find(i => i.id === 3);
     if (nextIsland) nextIsland.state = VoyageIslandState.current;
 
     const route = voyageRoutes.find(r => r.from === 2 && r.to === 3);
     if (route) route.state = VoyageIslandState.completed;
-    
+
     selectedIslandId = 3; // Focus on unlocked node
   }
 
@@ -1065,7 +1066,7 @@ function showToast(message, type = "info") {
   toast.className = `toast ${type}`;
   toast.innerText = message;
   container.appendChild(toast);
-  
+
   setTimeout(() => {
     toast.style.opacity = '0';
     setTimeout(() => toast.remove(), 300);
