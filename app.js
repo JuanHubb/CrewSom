@@ -1774,28 +1774,25 @@ function renderRoadmap() {
   viewport.querySelectorAll(".roadmap-node, .roadmap-avatar").forEach(el => el.remove());
 
   const points = [
-    { x: 50, y: 330, day: 1 },
-    { x: 120, y: 310, day: 2 },
-    { x: 170, y: 250, day: 3 },
-    { x: 120, y: 190, day: 4 },
-    { x: 80, y: 130, day: 5 },
-    { x: 160, y: 80, day: 6 },
-    { x: 260, y: 60, day: 7 }
+    { x: 60, y: 430, day: 1 },
+    { x: 260, y: 365, day: 2 },
+    { x: 60, y: 300, day: 3 },
+    { x: 260, y: 235, day: 4 },
+    { x: 60, y: 170, day: 5 },
+    { x: 260, y: 105, day: 6 },
+    { x: 160, y: 40, day: 7 }
   ];
 
-  // Draw Path line
+  // Draw Path line (Zigzag)
   let pathD = `M ${points[0].x} ${points[0].y} `;
   for (let i = 1; i < points.length; i++) {
-    const pPrev = points[i - 1];
-    const pCurr = points[i];
-    const cpX1 = pPrev.x + (pCurr.x - pPrev.x) * 0.5;
-    const cpY1 = pPrev.y;
-    const cpX2 = pPrev.x + (pCurr.x - pPrev.x) * 0.5;
-    const cpY2 = pCurr.y;
-    pathD += `C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${pCurr.x} ${pCurr.y} `;
+    pathD += `L ${points[i].x} ${points[i].y} `;
   }
 
-  svg.innerHTML = `<path d="${pathD}" fill="none" stroke="#334155" stroke-width="8" stroke-linecap="round"/>`;
+  svg.innerHTML = `
+    <path d="${pathD}" fill="none" stroke="rgba(255, 255, 255, 0.12)" stroke-width="12" stroke-linecap="round"/>
+    <path d="${pathD}" fill="none" stroke="#3b82f6" stroke-width="5" stroke-linecap="round" stroke-dasharray="6 4"/>
+  `;
 
   // Draw nodes
   points.forEach(p => {

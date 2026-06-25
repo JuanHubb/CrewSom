@@ -1338,7 +1338,7 @@ input:checked + .slider:before {
 .roadmap-container {
   position: relative;
   width: 100%;
-  height: 380px;
+  height: 480px;
   background: rgba(255, 255, 255, 0.02);
   border: 1.5px solid var(--glass-border);
   border-radius: 20px;

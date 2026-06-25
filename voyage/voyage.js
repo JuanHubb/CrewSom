@@ -262,7 +262,7 @@ function buildWorldMapScene() {
       islandMesh.userData.glowRing = glow; // save for pulsing
     }
 
-    islandMesh.scale.set(0.6, 0.6, 0.6);
+    islandMesh.scale.set(0.4, 0.4, 0.4);
     mapIslandsGroup.add(islandMesh);
   });
 
