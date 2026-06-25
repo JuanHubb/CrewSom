@@ -49,7 +49,8 @@
       <!-- Active Workout Overlay -->
       <div id="workout-active-overlay" class="workout-active-overlay">
         <div class="workout-overlay-header">
-          <span class="workout-overlay-label"><i class="fa-solid fa-fire-flame-simple animate-pulse"></i> 실시간 운동 측정 중</span>
+          <span class="workout-overlay-label"><i class="fa-solid fa-fire-flame-simple animate-pulse"></i> 실시간 운동 측정
+            중</span>
         </div>
         <div class="workout-overlay-body">
           <div class="workout-overlay-stat">
@@ -111,20 +112,25 @@
 
       <!-- Workout Result Modal -->
       <div class="modal-overlay" id="modal-workout-result">
-        <div class="modal-content" style="max-width: 320px; background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);">
+        <div class="modal-content"
+          style="max-width: 320px; background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);">
           <div class="modal-header" style="border: none; padding-bottom: 0;">
-            <h3 class="modal-title" style="color: #38bdf8; font-weight: 900;"><i class="fa-solid fa-trophy"></i> 운동 완료!</h3>
-            <button class="modal-close" onclick="closeModal(document.getElementById('modal-workout-result'))"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="modal-title" style="color: #38bdf8; font-weight: 900;"><i class="fa-solid fa-trophy"></i> 운동 완료!
+            </h3>
+            <button class="modal-close" onclick="closeModal(document.getElementById('modal-workout-result'))"><i
+                class="fa-solid fa-xmark"></i></button>
           </div>
-          <div class="modal-body" style="padding: 20px; text-align: center; display: flex; flex-direction: column; gap: 16px;">
+          <div class="modal-body"
+            style="padding: 20px; text-align: center; display: flex; flex-direction: column; gap: 16px;">
             <div style="font-size: 13px; color: var(--color-text-muted);">오늘도 한 걸음 정복하셨습니다!</div>
-            
-            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+
+            <div
+              style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
               <div>
                 <div style="font-size: 10px; color: var(--color-text-muted);">운동 종목</div>
                 <div id="workout-result-type" style="font-size: 18px; font-weight: 800; color: #fff;">러닝 (중강도)</div>
               </div>
-              
+
               <div style="display: flex; justify-content: space-around; margin-top: 8px;">
                 <div>
                   <div style="font-size: 10px; color: var(--color-text-muted);">시간</div>
@@ -135,42 +141,49 @@
                   <div id="workout-result-met" style="font-size: 16px; font-weight: 700; color: #fff;">8.3</div>
                 </div>
               </div>
-              
+
               <div style="margin-top: 8px; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 12px;">
                 <div style="font-size: 11px; color: #38bdf8; font-weight: 700;">충전된 운동력 (Fitness Points)</div>
-                <div id="workout-result-power" style="font-size: 28px; font-weight: 900; color: #10b981; text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);">+45 FP</div>
+                <div id="workout-result-power"
+                  style="font-size: 28px; font-weight: 900; color: #10b981; text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);">
+                  +45 FP</div>
               </div>
             </div>
-            
-            <button class="wood-btn-large" style="margin-top: 8px; position: static; transform: none; width: 100%;" onclick="closeModal(document.getElementById('modal-workout-result'))">확인</button>
+
+            <button class="wood-btn-large" style="margin-top: 8px; position: static; transform: none; width: 100%;"
+              onclick="closeModal(document.getElementById('modal-workout-result'))">확인</button>
           </div>
         </div>
       </div>
 
       <!-- Buoy (Simplified Workout Selector) Modal -->
       <div class="modal-overlay" id="modal-buoy-workout">
-        <div class="modal-content" style="max-width: 320px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+        <div class="modal-content"
+          style="max-width: 320px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
           <div class="modal-header" style="border: none; padding-bottom: 0;">
-            <h3 class="modal-title" style="color: #38bdf8; font-weight: 800;"><i class="fa-solid fa-person-running"></i> 간편 운동 선택</h3>
-            <button class="modal-close" onclick="closeModal(document.getElementById('modal-buoy-workout'))"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="modal-title" style="color: #38bdf8; font-weight: 800;"><i class="fa-solid fa-person-running"></i>
+              간편 운동 선택</h3>
+            <button class="modal-close" onclick="closeModal(document.getElementById('modal-buoy-workout'))"><i
+                class="fa-solid fa-xmark"></i></button>
           </div>
           <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
             <div class="form-group" id="buoy-workout-type-group" style="margin-bottom: 0;">
               <span class="form-label" style="font-size: 11px;">운동 종목</span>
-                <div class="radio-card active" data-value="COURSE" style="flex: 1; padding: 10px 4px; border-radius: 12px;">
-                  <i class="fa-solid fa-route" style="font-size: 16px;"></i>
-                  <span style="font-size: 11px;">코스 운동</span>
-                </div>
-                <div class="radio-card" data-value="INDOOR" style="flex: 1; padding: 10px 4px; border-radius: 12px;">
-                  <i class="fa-solid fa-dumbbell" style="font-size: 16px;"></i>
-                  <span style="font-size: 11px;">실내운동</span>
-                </div>
-                <div class="radio-card" data-value="OUTDOOR" style="flex: 1; padding: 10px 4px; border-radius: 12px;">
-                  <i class="fa-solid fa-mountain-sun" style="font-size: 16px;"></i>
-                  <span style="font-size: 11px;">실외운동</span>
-                </div>
+              <div class="radio-card active" data-value="COURSE"
+                style="flex: 1; padding: 10px 4px; border-radius: 12px;">
+                <i class="fa-solid fa-route" style="font-size: 16px;"></i>
+                <span style="font-size: 11px;">코스 운동</span>
+              </div>
+              <div class="radio-card" data-value="INDOOR" style="flex: 1; padding: 10px 4px; border-radius: 12px;">
+                <i class="fa-solid fa-dumbbell" style="font-size: 16px;"></i>
+                <span style="font-size: 11px;">실내운동</span>
+              </div>
+              <div class="radio-card" data-value="OUTDOOR" style="flex: 1; padding: 10px 4px; border-radius: 12px;">
+                <i class="fa-solid fa-mountain-sun" style="font-size: 16px;"></i>
+                <span style="font-size: 11px;">실외운동</span>
+              </div>
             </div>
-            
+
             <div class="form-group" style="margin-bottom: 0;">
               <span class="form-label" style="font-size: 11px;">운동 강도</span>
               <div class="radio-group" id="buoy-workout-intensity-group" style="gap: 8px;">
@@ -178,7 +191,8 @@
                   <i class="fa-solid fa-leaf" style="color: #6ee7b7; font-size: 16px;"></i>
                   <span style="font-size: 11px;">저강도</span>
                 </div>
-                <div class="radio-card active" data-value="MODERATE" style="flex: 1; padding: 10px 4px; border-radius: 12px;">
+                <div class="radio-card active" data-value="MODERATE"
+                  style="flex: 1; padding: 10px 4px; border-radius: 12px;">
                   <i class="fa-solid fa-bolt" style="color: #fde047; font-size: 16px;"></i>
                   <span style="font-size: 11px;">중강도</span>
                 </div>
@@ -188,8 +202,10 @@
                 </div>
               </div>
             </div>
-            
-            <button class="wood-btn-large" id="btn-save-buoy-workout" style="position:static; transform:none; width:100%; font-size:16px; height:44px; margin-top:8px;">운동 시작 설정 완료</button>
+
+            <button class="wood-btn-large" id="btn-save-buoy-workout"
+              style="position:static; transform:none; width:100%; font-size:16px; height:44px; margin-top:8px;">운동 시작 설정
+              완료</button>
           </div>
         </div>
       </div>
@@ -284,11 +300,13 @@
             <button class="modal-close"><i class="fa-solid fa-xmark"></i></button>
           </div>
           <div class="modal-body">
-            <div id="tab-crew-friends-content" class="friends-list" style="display: flex; flex-direction: column; gap: 8px; height: 100%;">
+            <div id="tab-crew-friends-content" class="friends-list"
+              style="display: flex; flex-direction: column; gap: 8px; height: 100%;">
               <div class="search-container" style="width: 100%;">
                 <input type="text" class="search-input" id="input-search-friend" placeholder="친구 검색...">
               </div>
-              <div id="crew-friends-list-container" class="friends-list" style="width: 100%; flex: 1; overflow-y: auto;">
+              <div id="crew-friends-list-container" class="friends-list"
+                style="width: 100%; flex: 1; overflow-y: auto;">
                 <!-- Dynamically generated friend cards -->
               </div>
             </div>
@@ -387,7 +405,8 @@
               </div>
             </div>
 
-            <div id="tab-shop-view-content" style="display:none; flex-direction:column; gap:12px; max-height: 280px; overflow-y: auto; padding-right: 4px;">
+            <div id="tab-shop-view-content"
+              style="display:none; flex-direction:column; gap:12px; max-height: 280px; overflow-y: auto; padding-right: 4px;">
               <div class="shop-item">
                 <div class="shop-left">
                   <div style="font-size:32px; color:var(--wood-light)"><i class="fa-solid fa-cubes"></i></div>
@@ -508,9 +527,10 @@
           <div class="mypage-title"><i class="fa-regular fa-user"></i> 마이페이지</div>
         </div>
         <div class="mypage-body" id="mypage-body-content">
-            <!-- Populated dynamically in app.js -->
-            <button class="wood-btn-large" id="btn-edit-mypage" style="margin-top:8px; width:100%; font-size:16px;">프로필 수정</button>
-          </div>
+          <!-- Populated dynamically in app.js -->
+          <button class="wood-btn-large" id="btn-edit-mypage" style="margin-top:8px; width:100%; font-size:16px;">프로필
+            수정</button>
+        </div>
       </div>
 
       <!-- ================= CREW VIEW (LEFT TAB) ================= -->
@@ -607,6 +627,16 @@
 
   <!-- Application Logic -->
   <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('서비스 워커 등록 성공!', reg.scope))
+          .catch(err => console.log('서비스 워커 등록 실패:', err));
+      });
+    }
+  </script>
+
 </body>
 
 </html>
