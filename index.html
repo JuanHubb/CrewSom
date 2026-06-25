@@ -155,7 +155,7 @@
             <button class="modal-close" onclick="closeModal(document.getElementById('modal-buoy-workout'))"><i class="fa-solid fa-xmark"></i></button>
           </div>
           <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
-            <div class="form-group" style="margin-bottom: 0;">
+            <div class="form-group" id="buoy-workout-type-group" style="margin-bottom: 0;">
               <span class="form-label" style="font-size: 11px;">운동 종목</span>
                 <div class="radio-card active" data-value="COURSE" style="flex: 1; padding: 10px 4px; border-radius: 12px;">
                   <i class="fa-solid fa-route" style="font-size: 16px;"></i>
@@ -476,8 +476,9 @@
           <div class="mypage-title"><i class="fa-regular fa-user"></i> 마이페이지</div>
         </div>
         <div class="mypage-body" id="mypage-body-content">
-          <!-- Populated dynamically in app.js -->
-        </div>
+            <!-- Populated dynamically in app.js -->
+            <button class="wood-btn-large" id="btn-edit-mypage" style="margin-top:8px; width:100%; font-size:16px;">프로필 수정</button>
+          </div>
       </div>
 
       <!-- ================= CREW VIEW (LEFT TAB) ================= -->
