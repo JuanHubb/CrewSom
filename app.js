@@ -1774,13 +1774,13 @@ function renderRoadmap() {
   viewport.querySelectorAll(".roadmap-node, .roadmap-avatar").forEach(el => el.remove());
 
   const points = [
-    { x: 60, y: 430, day: 1 },
-    { x: 260, y: 365, day: 2 },
-    { x: 60, y: 300, day: 3 },
-    { x: 260, y: 235, day: 4 },
-    { x: 60, y: 170, day: 5 },
-    { x: 260, y: 105, day: 6 },
-    { x: 160, y: 40, day: 7 }
+    { x: 60, y: 325, day: 1 },
+    { x: 260, y: 275, day: 2 },
+    { x: 60, y: 225, day: 3 },
+    { x: 260, y: 175, day: 4 },
+    { x: 60, y: 125, day: 5 },
+    { x: 260, y: 75, day: 6 },
+    { x: 160, y: 30, day: 7 }
   ];
 
   // Draw Path line (Zigzag)
