@@ -51,6 +51,7 @@ body {
 /* Phone Bezel Container */
 #phone-container {
   position: relative;
+  top: -10px;
   width: min(100vw - 20px, 430px);
   max-width: calc((100vh - 20px) * 6 / 11);
   aspect-ratio: 6 / 11;
